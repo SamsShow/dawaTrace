@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "DawaTrace",
+    "slug": "dawaTrace",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#16a34a"
+    },
+    "plugins": [
+      "expo-router",
+      ["expo-camera", { "cameraPermission": "DawaTrace uses your camera to scan medicine QR codes." }],
+      ["expo-sqlite"],
+      ["expo-secure-store"]
+    ],
+    "ios": {
+      "bundleIdentifier": "in.gov.cdac.dawatrace",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "in.gov.cdac.dawatrace",
+      "permissions": ["CAMERA"],
+      "minSdkVersion": 23
+    },
+    "scheme": "dawatrace",
+    "newArchEnabled": true
+  }
+}

@@ -1,0 +1,10 @@
+module github.com/dawaTrace/chaincode
+
+go 1.21
+
+require (
+	github.com/hyperledger/fabric-contract-api-go v1.2.2
+	github.com/hyperledger/fabric-chaincode-go v0.6.0
+	github.com/hyperledger/fabric-protos-go v0.3.3
+	golang.org/x/crypto v0.21.0
+)

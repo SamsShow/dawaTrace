@@ -1,0 +1,70 @@
+version: '3.8'
+# Full production-oriented compose — all services together
+# For Fabric network only: use fabric/network/docker-compose.fabric.yml
+
+networks:
+  dawaTrace:
+    name: dawaTrace_network
+
+services:
+  # API Gateway
+  api:
+    build:
+      context: ../api
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - FABRIC_GATEWAY_ENDPOINT=peer0.org-mfg.dawaTrace.com:7051
+    env_file: ../.env
+    depends_on:
+      - redis
+    networks:
+      - dawaTrace
+    restart: unless-stopped
+
+  # Bridge Relay
+  bridge:
+    build:
+      context: ../bridge
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+    env_file: ../.env
+    depends_on:
+      - redis
+    networks:
+      - dawaTrace
+    restart: unless-stopped
+    volumes:
+      - ./dead-letter:/app/dead-letter  # Dead-lettered events persist across restarts
+
+  # Redis (bridge retry queue)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - dawaTrace
+    restart: unless-stopped
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+    networks:
+      - dawaTrace
+    restart: unless-stopped
+
+volumes:
+  redis_data:

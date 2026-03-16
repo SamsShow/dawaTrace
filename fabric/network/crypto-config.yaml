@@ -1,0 +1,44 @@
+# DawaTrace — Hyperledger Fabric Crypto Config
+# Generates MSP material for 4 organizations + orderer
+
+OrdererOrgs:
+  - Name: Orderer
+    Domain: orderer.dawaTrace.com
+    EnableNodeOUs: true
+    Specs:
+      - Hostname: orderer
+      - Hostname: orderer2
+      - Hostname: orderer3
+
+PeerOrgs:
+  - Name: OrgMfg
+    Domain: org-mfg.dawaTrace.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 2
+
+  - Name: OrgDistributor
+    Domain: org-distributor.dawaTrace.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 2
+
+  - Name: OrgChemist
+    Domain: org-chemist.dawaTrace.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 2
+
+  - Name: OrgRegulator
+    Domain: org-regulator.dawaTrace.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 2

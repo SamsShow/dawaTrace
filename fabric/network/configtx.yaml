@@ -1,0 +1,204 @@
+# DawaTrace — Hyperledger Fabric Channel Configuration
+
+Organizations:
+  - &OrdererOrg
+    Name: OrdererOrg
+    ID: OrdererMSP
+    MSPDir: crypto-config/ordererOrganizations/orderer.dawaTrace.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OrdererMSP.admin')"
+
+  - &OrgMfg
+    Name: OrgMfgMSP
+    ID: OrgMfgMSP
+    MSPDir: crypto-config/peerOrganizations/org-mfg.dawaTrace.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OrgMfgMSP.admin', 'OrgMfgMSP.peer', 'OrgMfgMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrgMfgMSP.admin', 'OrgMfgMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OrgMfgMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('OrgMfgMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.org-mfg.dawaTrace.com
+        Port: 7051
+
+  - &OrgDistributor
+    Name: OrgDistributorMSP
+    ID: OrgDistributorMSP
+    MSPDir: crypto-config/peerOrganizations/org-distributor.dawaTrace.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OrgDistributorMSP.admin', 'OrgDistributorMSP.peer', 'OrgDistributorMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrgDistributorMSP.admin', 'OrgDistributorMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OrgDistributorMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('OrgDistributorMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.org-distributor.dawaTrace.com
+        Port: 8051
+
+  - &OrgChemist
+    Name: OrgChemistMSP
+    ID: OrgChemistMSP
+    MSPDir: crypto-config/peerOrganizations/org-chemist.dawaTrace.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OrgChemistMSP.admin', 'OrgChemistMSP.peer', 'OrgChemistMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrgChemistMSP.admin', 'OrgChemistMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OrgChemistMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('OrgChemistMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.org-chemist.dawaTrace.com
+        Port: 9051
+
+  - &OrgRegulator
+    Name: OrgRegulatorMSP
+    ID: OrgRegulatorMSP
+    MSPDir: crypto-config/peerOrganizations/org-regulator.dawaTrace.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OrgRegulatorMSP.admin', 'OrgRegulatorMSP.peer', 'OrgRegulatorMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrgRegulatorMSP.admin', 'OrgRegulatorMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OrgRegulatorMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('OrgRegulatorMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.org-regulator.dawaTrace.com
+        Port: 10051
+
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_0: true
+  Orderer: &OrdererCapabilities
+    V2_0: true
+  Application: &ApplicationCapabilities
+    V2_5: true
+
+Application: &ApplicationDefaults
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+  OrdererType: etcdraft
+  Addresses:
+    - orderer.orderer.dawaTrace.com:7050
+    - orderer2.orderer.dawaTrace.com:8050
+    - orderer3.orderer.dawaTrace.com:9050
+  BatchTimeout: 2s
+  BatchSize:
+    MaxMessageCount: 10
+    AbsoluteMaxBytes: 99 MB
+    PreferredMaxBytes: 512 KB
+  EtcdRaft:
+    Consenters:
+      - Host: orderer.orderer.dawaTrace.com
+        Port: 7050
+        ClientTLSCert: crypto-config/ordererOrganizations/orderer.dawaTrace.com/orderers/orderer.orderer.dawaTrace.com/tls/server.crt
+        ServerTLSCert: crypto-config/ordererOrganizations/orderer.dawaTrace.com/orderers/orderer.orderer.dawaTrace.com/tls/server.crt
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+  Capabilities:
+    <<: *OrdererCapabilities
+
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities:
+    <<: *ChannelCapabilities
+
+Profiles:
+  DawaTraceGenesis:
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererOrg
+    Consortiums:
+      DawaTraceConsortium:
+        Organizations:
+          - *OrgMfg
+          - *OrgDistributor
+          - *OrgChemist
+          - *OrgRegulator
+
+  DawaTraceChannel:
+    Consortium: DawaTraceConsortium
+    <<: *ChannelDefaults
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *OrgMfg
+        - *OrgDistributor
+        - *OrgChemist
+        - *OrgRegulator

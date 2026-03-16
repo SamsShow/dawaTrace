@@ -1,0 +1,35 @@
+version: '3.8'
+
+networks:
+  dawaTrace:
+    external: true
+    name: dawaTrace_network
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - dawaTrace
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=dawaTrace-admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    networks:
+      - dawaTrace
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
+  grafana_data:

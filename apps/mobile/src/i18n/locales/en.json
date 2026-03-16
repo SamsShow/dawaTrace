@@ -1,0 +1,53 @@
+{
+  "loading": "Loading...",
+  "error": "Error",
+  "ok": "OK",
+  "success": "Success",
+  "login": {
+    "subtitle": "Pharmaceutical Supply Chain Verification",
+    "chemistId": "Chemist ID",
+    "chemistLogin": "Sign in as Chemist",
+    "verifyAsPatient": "Scan medicine as Patient (no login needed)",
+    "nodeIdRequired": "Please enter your Chemist ID",
+    "failed": "Login failed. Please try again."
+  },
+  "scan": {
+    "cameraPermission": "Camera access is required to scan QR codes on medicine packages.",
+    "grantPermission": "Grant Camera Permission",
+    "hint": "Point at the QR code on the medicine package",
+    "invalidQR": "This QR code is not a valid DawaTrace batch code."
+  },
+  "dispense": {
+    "quantity": "Quantity Dispensed",
+    "patientHash": "Patient Hash",
+    "hashHint": "SHA-256 of Aadhaar+BatchId+Timestamp (computed by your system)",
+    "requiredFields": "Please fill all required fields",
+    "invalidHash": "Patient hash must be a 64-character hex SHA-256",
+    "confirm": "Confirm Dispense",
+    "success": "Dispense recorded successfully",
+    "failed": "Failed to record dispense. Please try again.",
+    "offlineTitle": "Saved Offline",
+    "offlineQueued": "Dispense queued — will sync when internet is available",
+    "batchNotCached": "Batch not found in offline cache. Please scan when connected."
+  },
+  "verify": {
+    "scanHint": "Scan the QR code on your medicine",
+    "authentic": "Authentic Medicine",
+    "recalled": "RECALLED — Do Not Use",
+    "scanAnother": "Scan Another",
+    "report": "Report Suspicious Batch",
+    "failed": "Could not verify this batch. Check your connection."
+  },
+  "report": {
+    "title": "Report Suspicious Medicine",
+    "subtitle": "Help protect your community. Reports earn DawaPoints redeemable at Jan Aushadhi stores.",
+    "batchId": "Batch ID",
+    "reason": "What looks suspicious?",
+    "reasonPlaceholder": "Describe what you noticed (e.g., different color, unusual smell, broken seal...)",
+    "requiredFields": "Please fill all fields. Reason must be at least 10 characters.",
+    "submitted": "Report Submitted",
+    "dawaPointsInfo": "You will earn DawaPoints when CDSCO confirms this report. Redeem at Jan Aushadhi pharmacies for free generic medicines.",
+    "failed": "Failed to submit report. Please try again.",
+    "submit": "Submit Report"
+  }
+}
