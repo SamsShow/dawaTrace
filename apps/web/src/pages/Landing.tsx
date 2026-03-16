@@ -78,6 +78,7 @@ export default function Landing() {
             <a href="#how-it-works" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">How it works</a>
             <a href="#features" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">Features</a>
             <a href="#stack" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">Stack</a>
+            <Link to="/docs" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">Docs</Link>
             <Link to="/login" className="text-xs border border-border px-3 py-1.5 hover:bg-accent transition-colors">
               Sign in
             </Link>
@@ -274,12 +275,12 @@ export default function Landing() {
               Open dashboard
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
-            <a
-              href="https://github.com"
+            <Link
+              to="/docs"
               className="inline-flex items-center justify-center gap-2 border border-border text-xs px-6 py-3 hover:bg-accent transition-colors"
             >
-              View source
-            </a>
+              Read the docs
+            </Link>
           </div>
         </div>
       </section>
