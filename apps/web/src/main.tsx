@@ -4,7 +4,7 @@ import { ApolloClient, InMemoryCache, ApolloProvider, split, HttpLink } from '@a
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { createClient } from 'graphql-ws';
-import App from './App.tsx';
+import App from './App';
 import './index.css';
 
 const httpLink = new HttpLink({ uri: '/graphql' });
