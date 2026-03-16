@@ -45,11 +45,11 @@ function P({ children }: { children: React.ReactNode }) {
 function Callout({ kind = 'info', children }: { kind?: 'info' | 'warn' | 'danger'; children: React.ReactNode }) {
   const styles = {
     info:   'border-border bg-muted/30',
-    warn:   'border-amber-300/50 bg-amber-50/60',
+    warn:   'border-amber-300/50 bg-amber-50/60 dark:bg-amber-950/30 dark:border-amber-700/40',
     danger: 'border-destructive/30 bg-destructive/5',
   };
   const labels = { info: 'Note', warn: 'Warning', danger: 'Important' };
-  const labelColor = { info: 'text-foreground', warn: 'text-amber-700', danger: 'text-destructive' };
+  const labelColor = { info: 'text-foreground', warn: 'text-amber-700 dark:text-amber-400', danger: 'text-destructive' };
   return (
     <div className={cn('border px-4 py-3 my-4', styles[kind])}>
       <p className={cn('text-[11px] font-semibold uppercase tracking-wide mb-1', labelColor[kind])}>{labels[kind]}</p>
