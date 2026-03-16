@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, Shield, Zap, Smartphone, Globe, Lock, Activity } from 'lucide-react';
+import ThemeToggle from '../components/ThemeToggle';
 
 const STATS = [
   { value: '<60s', label: 'Recall propagation SLA', sub: 'Fabric commit → Sui anchor → UI update' },
@@ -79,6 +80,7 @@ export default function Landing() {
             <a href="#features" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">Features</a>
             <a href="#stack" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">Stack</a>
             <Link to="/docs" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">Docs</Link>
+            <ThemeToggle />
             <Link to="/login" className="text-xs border border-border px-3 py-1.5 hover:bg-accent transition-colors">
               Sign in
             </Link>

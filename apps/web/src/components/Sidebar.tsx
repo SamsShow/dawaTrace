@@ -3,6 +3,7 @@ import { LayoutDashboard, Package, AlertTriangle, BarChart2, LogOut } from 'luci
 import { useAuth } from '../hooks/useAuth';
 import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
+import ThemeToggle from './ThemeToggle';
 
 const NAV = [
   { to: '/dashboard', label: 'Overview', icon: LayoutDashboard },
@@ -49,13 +50,16 @@ export default function Sidebar() {
       <div className="px-4 py-3">
         <p className="text-xs text-foreground font-mono truncate mb-1">{user?.nodeId}</p>
         <p className="text-[11px] text-muted-foreground mb-2">{user?.orgRole}</p>
-        <button
-          onClick={logout}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <LogOut className="h-3 w-3" />
-          Sign out
-        </button>
+        <div className="flex items-center justify-between">
+          <button
+            onClick={logout}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <LogOut className="h-3 w-3" />
+            Sign out
+          </button>
+          <ThemeToggle />
+        </div>
       </div>
     </aside>
   );

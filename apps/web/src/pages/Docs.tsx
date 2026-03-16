@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { ChevronRight, ChevronDown, Menu, X } from 'lucide-react';
+import { ChevronRight, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import ThemeToggle from '../components/ThemeToggle';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -715,6 +716,7 @@ export default function Docs() {
             <Link to="/login" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
               Dashboard
             </Link>
+            <ThemeToggle />
             <button
               className="sm:hidden text-muted-foreground hover:text-foreground"
               onClick={() => setMobileOpen(v => !v)}
