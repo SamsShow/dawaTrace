@@ -1,22 +1,6 @@
 import { formatDistanceToNow } from 'date-fns';
 import type { CustodyRecord } from '../lib/types';
 
-const NODE_COLORS: Record<string, string> = {
-  MFG: 'bg-green-500',
-  DIST: 'bg-blue-500',
-  CF: 'bg-purple-500',
-  STOCK: 'bg-yellow-500',
-  CHEM: 'bg-orange-500',
-  CDSCO: 'bg-red-500',
-};
-
-function getNodeColor(nodeId: string): string {
-  for (const [prefix, color] of Object.entries(NODE_COLORS)) {
-    if (nodeId.startsWith(prefix)) return color;
-  }
-  return 'bg-gray-500';
-}
-
 function getNodeLabel(nodeId: string): string {
   if (nodeId.startsWith('MFG')) return 'Manufacturer';
   if (nodeId.startsWith('DIST')) return 'Distributor';
@@ -34,47 +18,48 @@ interface Props {
 export default function CustodyTimeline({ records, recalled }: Props) {
   if (records.length === 0) {
     return (
-      <div className="text-sm text-gray-400 italic py-4">
-        No custody records found on Sui — bridge may be syncing
-      </div>
+      <p className="text-xs text-muted-foreground py-4">
+        No custody records on Sui yet — bridge may be syncing.
+      </p>
     );
   }
 
   return (
-    <div className="relative">
+    <div>
       {recalled && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 font-medium">
-          ⚠ Batch has been recalled — all transfers invalidated
-        </div>
+        <p className="text-xs text-destructive mb-4 pb-3 border-b border-border">
+          This batch has been recalled. All transfers are invalidated.
+        </p>
       )}
-      <div className="space-y-0">
+      <div>
         {records.map((record, idx) => (
-          <div key={record.objectId} className="flex items-start gap-4">
-            {/* Timeline spine */}
-            <div className="flex flex-col items-center">
-              <div className={`w-3 h-3 rounded-full mt-1 ${getNodeColor(record.toNode)}`} />
+          <div key={record.objectId} className="flex gap-3">
+            {/* Spine */}
+            <div className="flex flex-col items-center pt-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-foreground mt-0.5 shrink-0" />
               {idx < records.length - 1 && (
-                <div className="w-0.5 bg-gray-200 flex-1 min-h-[2rem]" />
+                <div className="w-px bg-border flex-1 min-h-[1.75rem] mt-1" />
               )}
             </div>
-            {/* Card */}
-            <div className="pb-6 flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-2 mb-1">
-                <span className="text-sm font-medium text-gray-900">
-                  {getNodeLabel(record.fromNode)} → {getNodeLabel(record.toNode)}
+            {/* Content */}
+            <div className="pb-5 min-w-0 flex-1">
+              <p className="text-sm text-foreground">
+                {getNodeLabel(record.fromNode)}
+                <span className="text-muted-foreground mx-1.5">→</span>
+                {getNodeLabel(record.toNode)}
+              </p>
+              <div className="flex items-center gap-3 mt-0.5">
+                <span className="text-xs text-muted-foreground">
+                  {record.quantity.toLocaleString()} units
                 </span>
-                <span className="text-xs text-gray-400 shrink-0">
-                  #{record.sequence}
-                </span>
-              </div>
-              <div className="text-xs text-gray-500 space-y-0.5">
-                <div>Qty: <span className="font-mono">{record.quantity.toLocaleString()}</span></div>
-                <div>
+                <span className="text-xs text-muted-foreground">
                   {record.timestamp
                     ? formatDistanceToNow(new Date(record.timestamp), { addSuffix: true })
-                    : 'Unknown time'}
-                </div>
-                <div className="font-mono text-gray-300 truncate">{record.objectId.slice(0, 20)}...</div>
+                    : '—'}
+                </span>
+                <span className="text-xs font-mono text-muted-foreground/60">
+                  #{record.sequence}
+                </span>
               </div>
             </div>
           </div>

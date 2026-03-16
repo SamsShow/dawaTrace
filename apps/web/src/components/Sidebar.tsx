@@ -1,44 +1,58 @@
 import { NavLink } from 'react-router-dom';
+import { LayoutDashboard, AlertTriangle, BarChart2, LogOut } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { Separator } from './ui/separator';
+import { cn } from '@/lib/utils';
 
 const NAV = [
-  { to: '/', label: 'Dashboard', icon: '📊' },
-  { to: '/recalls', label: 'Recalls', icon: '🚨' },
-  { to: '/analytics', label: 'Analytics', icon: '📈' },
+  { to: '/', label: 'Overview', icon: LayoutDashboard },
+  { to: '/recalls', label: 'Recalls', icon: AlertTriangle },
+  { to: '/analytics', label: 'Analytics', icon: BarChart2 },
 ];
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
 
   return (
-    <aside className="w-60 shrink-0 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0">
-      <div className="px-6 py-5 border-b border-gray-100">
-        <h1 className="text-lg font-bold text-brand-700">DawaTrace</h1>
-        <p className="text-xs text-gray-400 mt-0.5">Regulator Dashboard</p>
+    <aside className="w-52 shrink-0 bg-background border-r border-border flex flex-col h-screen sticky top-0">
+      <div className="px-4 py-4">
+        <span className="text-sm font-semibold tracking-tight">DawaTrace</span>
+        <p className="text-[11px] text-muted-foreground mt-0.5">Regulatory Dashboard</p>
       </div>
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        {NAV.map((item) => (
+
+      <Separator />
+
+      <nav className="flex-1 px-2 py-3 space-y-0.5">
+        {NAV.map(({ to, label, icon: Icon }) => (
           <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/'}
+            key={to}
+            to={to}
+            end={to === '/'}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                isActive ? 'bg-brand-50 text-brand-700 font-medium' : 'text-gray-600 hover:bg-gray-50'
-              }`
+              cn(
+                'flex items-center gap-2.5 px-2.5 py-1.5 text-sm rounded-md transition-colors',
+                isActive
+                  ? 'bg-accent text-foreground font-medium'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+              )
             }
           >
-            <span>{item.icon}</span>
-            {item.label}
+            <Icon className="h-3.5 w-3.5 shrink-0" />
+            {label}
           </NavLink>
         ))}
       </nav>
-      <div className="px-6 py-4 border-t border-gray-100">
-        <p className="text-xs text-gray-500 mb-2">{user?.nodeId}</p>
+
+      <Separator />
+
+      <div className="px-4 py-3">
+        <p className="text-xs text-foreground font-mono truncate mb-1">{user?.nodeId}</p>
+        <p className="text-[11px] text-muted-foreground mb-2">{user?.orgRole}</p>
         <button
           onClick={logout}
-          className="text-xs text-gray-400 hover:text-gray-700 transition-colors"
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
+          <LogOut className="h-3 w-3" />
           Sign out
         </button>
       </div>

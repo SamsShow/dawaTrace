@@ -1,10 +1,35 @@
 import { useParams } from 'react-router-dom';
+import { useState } from 'react';
 import { useBatch, useVerifyBatch } from '../hooks/useBatch';
 import { useRecall } from '../hooks/useRecall';
 import Sidebar from '../components/Sidebar';
 import CustodyTimeline from '../components/CustodyTimeline';
 import RecallBanner from '../components/RecallBanner';
-import { useState } from 'react';
+import { Badge } from '../components/ui/badge';
+import { Button } from '../components/ui/button';
+import { Label } from '../components/ui/label';
+import { Textarea } from '../components/ui/textarea';
+import { Separator } from '../components/ui/separator';
+import type { BatchStatus } from '../lib/types';
+
+const STATUS_VARIANT: Record<BatchStatus, 'outline' | 'destructive' | 'warning' | 'success' | 'secondary'> = {
+  ACTIVE: 'success',
+  IN_TRANSIT: 'outline',
+  DISPENSED: 'secondary',
+  RECALLED: 'destructive',
+  SUSPENDED_REVIEW: 'warning',
+};
+
+function Field({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="py-2.5 border-b border-border last:border-0 flex items-baseline justify-between gap-4">
+      <span className="text-xs text-muted-foreground shrink-0">{label}</span>
+      <span className={`text-xs text-foreground text-right truncate ${mono ? 'font-mono' : ''}`}>
+        {value}
+      </span>
+    </div>
+  );
+}
 
 export default function BatchDetail() {
   const { batchId } = useParams<{ batchId: string }>();
@@ -20,7 +45,9 @@ export default function BatchDetail() {
     return (
       <div className="flex min-h-screen">
         <Sidebar />
-        <main className="flex-1 p-6 flex items-center justify-center text-gray-400">Loading...</main>
+        <main className="flex-1 p-6 flex items-center justify-center">
+          <span className="text-xs text-muted-foreground">Loading...</span>
+        </main>
       </div>
     );
   }
@@ -29,7 +56,9 @@ export default function BatchDetail() {
     return (
       <div className="flex min-h-screen">
         <Sidebar />
-        <main className="flex-1 p-6 flex items-center justify-center text-gray-400">Batch not found</main>
+        <main className="flex-1 p-6 flex items-center justify-center">
+          <span className="text-xs text-muted-foreground">Batch not found</span>
+        </main>
       </div>
     );
   }
@@ -38,88 +67,101 @@ export default function BatchDetail() {
     <div className="flex min-h-screen">
       <Sidebar />
       <main className="flex-1 overflow-auto">
-        {batch.status === 'RECALLED' && verification && (
+        {batch.status === 'RECALLED' && (
           <RecallBanner
             recall={{ batchId: batch.batchId, regulatorId: '', reason: '', timestamp: batch.updatedAt, suiTxDigest: '' }}
           />
         )}
-        <div className="p-6 max-w-3xl">
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">{batch.drugName}</h2>
-              <p className="text-sm font-mono text-gray-400 mt-0.5">{batch.batchId}</p>
-            </div>
+
+        {/* Page header */}
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-sm font-semibold truncate">{batch.drugName}</h1>
+            <p className="text-xs font-mono text-muted-foreground mt-0.5">{batch.batchId}</p>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <Badge variant={STATUS_VARIANT[batch.status]}>
+              {batch.status.replace('_', ' ')}
+            </Badge>
             {batch.status !== 'RECALLED' && (
-              <button
-                onClick={() => setShowRecallForm(true)}
-                className="px-4 py-2 bg-danger-600 text-white text-sm font-medium rounded-lg hover:bg-danger-700 transition-colors"
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setShowRecallForm((v) => !v)}
               >
                 Issue Recall
-              </button>
+              </Button>
             )}
           </div>
+        </div>
 
-          {/* Batch details grid */}
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            {[
-              ['Composition', batch.composition],
-              ['Expiry Date', batch.expiryDate],
-              ['Quantity', batch.quantity.toLocaleString()],
-              ['Status', batch.status],
-              ['Manufacturer', batch.manufacturerId],
-              ['Custodian', batch.currentCustodian],
-              ['Sui Object ID', batch.suiObjectId.slice(0, 20) + '...'],
-              ['Data Hash', batch.dataHash.slice(0, 20) + '...'],
-            ].map(([label, value]) => (
-              <div key={label} className="bg-white rounded-lg border border-gray-100 p-3">
-                <p className="text-xs text-gray-400 mb-1">{label}</p>
-                <p className="text-sm font-medium text-gray-900 truncate">{value}</p>
-              </div>
-            ))}
-          </div>
-
+        <div className="px-6 py-6 max-w-2xl space-y-6">
           {/* Recall form */}
           {showRecallForm && (
-            <div className="mb-6 p-4 bg-danger-50 border border-danger-200 rounded-xl">
-              <h3 className="text-sm font-semibold text-danger-800 mb-3">Confirm Recall</h3>
-              <textarea
-                className="w-full p-3 border border-danger-200 rounded-lg text-sm resize-none"
-                rows={3}
-                placeholder="Reason for recall (required, min 10 chars)"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-              />
-              <div className="flex gap-2 mt-3">
-                <button
+            <section className="border border-destructive/30 p-4 space-y-3">
+              <h2 className="text-xs font-semibold text-destructive">Confirm recall</h2>
+              <p className="text-xs text-muted-foreground">
+                This action is irreversible. The recall will be anchored to the Sui public layer within 60 seconds.
+              </p>
+              <div className="space-y-1.5">
+                <Label htmlFor="reason">Reason</Label>
+                <Textarea
+                  id="reason"
+                  rows={3}
+                  placeholder="Contamination detected, labeling error..."
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="destructive"
+                  size="sm"
                   disabled={reason.length < 10 || recalling}
                   onClick={async () => {
                     await recall(batch.batchId, reason);
                     setShowRecallForm(false);
                   }}
-                  className="px-4 py-2 bg-danger-600 text-white text-sm font-medium rounded-lg disabled:opacity-50"
                 >
-                  {recalling ? 'Issuing...' : 'Confirm Recall'}
-                </button>
-                <button
-                  onClick={() => setShowRecallForm(false)}
-                  className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900"
-                >
+                  {recalling ? 'Issuing...' : 'Confirm'}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setShowRecallForm(false)}>
                   Cancel
-                </button>
+                </Button>
               </div>
-            </div>
+            </section>
           )}
 
-          {/* Custody timeline from Sui */}
-          <div className="bg-white rounded-xl border border-gray-100 p-6">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4">
-              Chain of Custody (Sui Public Layer)
-            </h3>
+          {/* Batch metadata */}
+          <section>
+            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+              Batch details
+            </h2>
+            <div className="border border-border px-4">
+              <Field label="Drug name" value={batch.drugName} />
+              <Field label="Composition" value={batch.composition} />
+              <Field label="Expiry date" value={batch.expiryDate} />
+              <Field label="Quantity" value={batch.quantity.toLocaleString()} />
+              <Field label="Manufacturer" value={batch.manufacturerId} mono />
+              <Field label="Current custodian" value={batch.currentCustodian} mono />
+              <Field label="Sui Object ID" value={batch.suiObjectId} mono />
+              <Field label="Data hash" value={batch.dataHash} mono />
+            </div>
+          </section>
+
+          {/* Custody timeline */}
+          <section>
+            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+              Chain of custody
+              <span className="ml-2 font-normal normal-case text-muted-foreground/60">
+                via Sui public layer
+              </span>
+            </h2>
             <CustodyTimeline
               records={verification?.custodyChain ?? []}
               recalled={verification?.recalled}
             />
-          </div>
+          </section>
         </div>
       </main>
     </div>

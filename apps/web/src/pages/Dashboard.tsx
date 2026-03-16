@@ -1,10 +1,7 @@
 import { useQuery, gql } from '@apollo/client';
 import Sidebar from '../components/Sidebar';
-import BatchCard from '../components/BatchCard';
-import RecallBanner from '../components/RecallBanner';
-import type { Batch, RecallRecord } from '../lib/types';
+import { Separator } from '../components/ui/separator';
 
-// Placeholder query — in production this would be paginated
 const DASHBOARD_QUERY = gql`
   query DashboardData {
     anomalies(limit: 5) {
@@ -16,12 +13,11 @@ const DASHBOARD_QUERY = gql`
   }
 `;
 
-// Static summary cards for the prototype
-const SUMMARY_CARDS = [
-  { label: 'Active Batches', value: '1,247', color: 'text-brand-600', bg: 'bg-brand-50' },
-  { label: 'Recalls Today', value: '2', color: 'text-danger-600', bg: 'bg-danger-50' },
-  { label: 'Flagged Chemists', value: '5', color: 'text-warning-600', bg: 'bg-warning-50' },
-  { label: 'Sui Anchored', value: '99.8%', color: 'text-blue-600', bg: 'bg-blue-50' },
+const STATS = [
+  { label: 'Active batches', value: '1,247' },
+  { label: 'Recalls today', value: '2' },
+  { label: 'Flagged chemists', value: '5' },
+  { label: 'Sui anchored', value: '99.8%' },
 ];
 
 export default function Dashboard() {
@@ -30,51 +26,69 @@ export default function Dashboard() {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 p-6 overflow-auto">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Supply Chain Overview</h2>
+      <main className="flex-1 overflow-auto">
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-border">
+          <h1 className="text-sm font-semibold">Overview</h1>
+        </div>
 
-        {/* Summary cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {SUMMARY_CARDS.map((card) => (
-            <div key={card.label} className={`${card.bg} rounded-xl p-4`}>
-              <p className="text-xs text-gray-500 mb-1">{card.label}</p>
-              <p className={`text-2xl font-bold ${card.color}`}>{card.value}</p>
+        {/* Stats row */}
+        <div className="grid grid-cols-4 border-b border-border divide-x divide-border">
+          {STATS.map((s) => (
+            <div key={s.label} className="px-6 py-4">
+              <p className="text-xs text-muted-foreground mb-1">{s.label}</p>
+              <p className="text-xl font-semibold tabular-nums">{s.value}</p>
             </div>
           ))}
         </div>
 
-        {/* Anomaly alerts */}
-        {data?.anomalies?.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">Anomaly Alerts</h3>
-            <div className="space-y-2">
-              {data.anomalies.map((a: { batchId: string; type: string; description: string }) => (
-                <div key={a.batchId} className="flex items-start gap-3 p-3 bg-warning-50 border border-warning-100 rounded-lg">
-                  <span className="text-warning-600">⚠</span>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{a.type}</p>
-                    <p className="text-xs text-gray-500">{a.description} — Batch {a.batchId}</p>
+        <div className="px-6 py-6 space-y-6">
+          {/* Anomalies */}
+          {data?.anomalies?.length > 0 && (
+            <section>
+              <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                Anomalies
+              </h2>
+              <div className="border border-border">
+                {data.anomalies.map((a: { batchId: string; type: string; description: string }, i: number) => (
+                  <div key={a.batchId} className={`px-4 py-3 flex items-start gap-3 ${i > 0 ? 'border-t border-border' : ''}`}>
+                    <span className="text-xs font-medium text-destructive shrink-0 mt-0.5">
+                      {a.type}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {a.description} · Batch <span className="font-mono">{a.batchId}</span>
+                    </span>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Map placeholder */}
+          <section>
+            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+              Batch Distribution
+            </h2>
+            <div className="border border-border h-56 flex items-center justify-center">
+              <p className="text-xs text-muted-foreground">
+                Map renders here — Leaflet with Fabric transfer GPS coordinates
+              </p>
             </div>
-          </div>
-        )}
+          </section>
 
-        {/* India supply chain map placeholder */}
-        <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
-          <h3 className="text-sm font-semibold text-gray-700 mb-4">Batch Distribution Map</h3>
-          <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 text-sm">
-            Leaflet map — loads with active batch GPS coordinates from Fabric transfer records
-          </div>
-        </div>
-
-        {/* Recent batches placeholder */}
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">Recent Batch Activity</h3>
-          <p className="text-xs text-gray-400">
-            Connect to Fabric to see live batch data. Use the GraphQL API at /graphql.
-          </p>
+          {/* Recent activity */}
+          <section>
+            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+              Recent Activity
+            </h2>
+            <div className="border border-border">
+              <div className="px-4 py-8 flex items-center justify-center">
+                <p className="text-xs text-muted-foreground">
+                  Connect to Fabric to see live batch activity
+                </p>
+              </div>
+            </div>
+          </section>
         </div>
       </main>
     </div>

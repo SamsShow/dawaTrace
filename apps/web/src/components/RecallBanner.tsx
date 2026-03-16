@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import type { RecallRecord } from '../lib/types';
+import { X } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import type { RecallRecord } from '../lib/types';
 
 interface Props {
   recall: RecallRecord;
@@ -9,31 +10,23 @@ interface Props {
 
 export default function RecallBanner({ recall, onDismiss }: Props) {
   const [dismissed, setDismissed] = useState(false);
-
   if (dismissed) return null;
 
   return (
-    <div className="w-full bg-red-600 text-white px-4 py-3 flex items-start justify-between gap-4">
-      <div className="flex items-start gap-3">
-        <span className="text-xl">🚨</span>
-        <div>
-          <p className="font-semibold text-sm">
-            RECALL ISSUED: Batch {recall.batchId}
-          </p>
-          <p className="text-xs text-red-100 mt-0.5">
-            {recall.reason} — by {recall.regulatorId},{' '}
-            {formatDistanceToNow(new Date(recall.timestamp * 1000), { addSuffix: true })}
-          </p>
-        </div>
+    <div className="w-full border-b border-destructive/30 bg-destructive/5 px-4 py-2.5 flex items-center justify-between gap-4">
+      <div className="flex items-baseline gap-2 min-w-0">
+        <span className="text-xs font-semibold text-destructive shrink-0">RECALLED</span>
+        <span className="text-xs text-muted-foreground truncate">
+          Batch {recall.batchId}
+          {recall.reason ? ` — ${recall.reason}` : ''}
+          {recall.timestamp ? ` · ${formatDistanceToNow(new Date(recall.timestamp * 1000), { addSuffix: true })}` : ''}
+        </span>
       </div>
       <button
-        onClick={() => {
-          setDismissed(true);
-          onDismiss?.();
-        }}
-        className="text-red-100 hover:text-white shrink-0 text-lg leading-none"
+        onClick={() => { setDismissed(true); onDismiss?.(); }}
+        className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
       >
-        ×
+        <X className="h-3.5 w-3.5" />
       </button>
     </div>
   );
