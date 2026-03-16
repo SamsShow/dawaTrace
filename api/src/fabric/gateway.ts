@@ -34,11 +34,9 @@ export async function getFabricGateway(): Promise<Gateway> {
       mspId: config.FABRIC_MSP_ID,
       credentials: Buffer.from(certPem),
     },
-    signer: {
-      sign: async (digest) => {
-        const key = crypto.createPrivateKey(keyPem);
-        return crypto.sign(null, Buffer.from(digest), key);
-      },
+    signer: async (digest) => {
+      const key = crypto.createPrivateKey(keyPem);
+      return crypto.sign(null, Buffer.from(digest), key);
     },
     evaluateOptions: () => ({ deadline: Date.now() + 5_000 }),
     endorseOptions: () => ({ deadline: Date.now() + 30_000 }),

@@ -18,7 +18,12 @@ router.post('/', requireAuth, requireRole('MANUFACTURER'), async (req, res, next
   try {
     const body = MintBatchSchema.parse(req.body);
     await fabricClient.mintBatch({
-      ...body,
+      batchId: body.batchId,
+      drugName: body.drugName,
+      composition: body.composition,
+      expiryDate: body.expiryDate,
+      quantity: body.quantity,
+      details: body.details,
       manufacturerId: req.user!.nodeId,
     });
     res.status(201).json({ message: 'Batch minted', batchId: body.batchId });
@@ -48,7 +53,9 @@ router.post('/:batchId/transfer', requireAuth, requireRole('MANUFACTURER', 'DIST
     await fabricClient.transferBatch({
       batchId: req.params['batchId']!,
       fromNode: req.user!.nodeId,
-      ...body,
+      toNode: body.toNode,
+      quantity: body.quantity,
+      gpsLocation: body.gpsLocation,
     });
     res.json({ message: 'Transfer recorded' });
   } catch (err) {
@@ -67,7 +74,8 @@ router.post('/:batchId/dispense', requireAuth, requireRole('CHEMIST'), async (re
     await fabricClient.dispenseMedicine({
       batchId: req.params['batchId']!,
       chemistId: req.user!.nodeId,
-      ...body,
+      quantity: body.quantity,
+      patientHash: body.patientHash,
     });
     res.json({ message: 'Dispense logged' });
   } catch (err) {
