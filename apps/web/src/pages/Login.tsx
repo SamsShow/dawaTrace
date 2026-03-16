@@ -19,7 +19,7 @@ export default function Login() {
       return;
     }
     setAuth('dev-token', { nodeId, orgRole: 'REGULATOR', mspId: 'OrgRegulatorMSP' });
-    navigate('/');
+    navigate('/dashboard');
   };
 
   return (

@@ -5,7 +5,7 @@ import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
 
 const NAV = [
-  { to: '/', label: 'Overview', icon: LayoutDashboard },
+  { to: '/dashboard', label: 'Overview', icon: LayoutDashboard },
   { to: '/batches', label: 'Batches', icon: Package },
   { to: '/recalls', label: 'Recalls', icon: AlertTriangle },
   { to: '/analytics', label: 'Analytics', icon: BarChart2 },
@@ -28,7 +28,7 @@ export default function Sidebar() {
           <NavLink
             key={to}
             to={to}
-            end={to === '/'}
+            end={to === '/dashboard'}
             className={({ isActive }) =>
               cn(
                 'flex items-center gap-2.5 px-2.5 py-1.5 text-sm rounded-md transition-colors',
