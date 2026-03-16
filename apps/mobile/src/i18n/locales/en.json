@@ -3,6 +3,15 @@
   "error": "Error",
   "ok": "OK",
   "success": "Success",
+  "back": "Back",
+  "otp": {
+    "sentTo": "OTP sent to {{id}}",
+    "verify": "Verify OTP",
+    "incomplete": "Please enter all 6 digits",
+    "verifyFailed": "Verification failed. Please try again.",
+    "resend": "Resend OTP",
+    "resendIn": "Resend in {{seconds}}s"
+  },
   "login": {
     "subtitle": "Pharmaceutical Supply Chain Verification",
     "chemistId": "Chemist ID",
