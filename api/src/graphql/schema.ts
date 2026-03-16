@@ -59,7 +59,9 @@ export const typeDefs = `#graphql
 
   type Query {
     batch(batchId: String!): Batch
+    batches: [Batch!]!
     recall(batchId: String!): RecallRecord
+    recalls: [RecallRecord!]!
     verifyBatch(suiObjectId: String!): BatchVerification
     anomalies(limit: Int): [AnomalyAlert!]!
   }

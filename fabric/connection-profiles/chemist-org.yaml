@@ -1,0 +1,54 @@
+name: dawaTrace-chemist-org
+version: 1.0.0
+client:
+  organization: ChemistOrg
+  connection:
+    timeout:
+      peer:
+        endorser: 300
+      orderer: 300
+
+organizations:
+  ChemistOrg:
+    mspid: ChemistOrgMSP
+    peers:
+      - peer0.chemist.dawaTrace.com
+    certificateAuthorities:
+      - ca.chemist.dawaTrace.com
+
+peers:
+  peer0.chemist.dawaTrace.com:
+    url: grpcs://peer0.chemist.dawaTrace.com:9051
+    tlsCACerts:
+      path: /fabric/crypto-config/peerOrganizations/chemist.dawaTrace.com/tlsca/tlsca.chemist.dawaTrace.com-cert.pem
+    grpcOptions:
+      ssl-target-name-override: peer0.chemist.dawaTrace.com
+      hostnameOverride: peer0.chemist.dawaTrace.com
+
+orderers:
+  orderer.dawaTrace.com:
+    url: grpcs://orderer.dawaTrace.com:7050
+    tlsCACerts:
+      path: /fabric/crypto-config/ordererOrganizations/dawaTrace.com/tlsca/tlsca.dawaTrace.com-cert.pem
+    grpcOptions:
+      ssl-target-name-override: orderer.dawaTrace.com
+
+certificateAuthorities:
+  ca.chemist.dawaTrace.com:
+    url: https://ca.chemist.dawaTrace.com:9054
+    caName: ca-chemist
+    tlsCACerts:
+      path: /fabric/crypto-config/peerOrganizations/chemist.dawaTrace.com/ca/ca.chemist.dawaTrace.com-cert.pem
+    httpOptions:
+      verify: false
+
+channels:
+  dawaTrace-channel:
+    orderers:
+      - orderer.dawaTrace.com
+    peers:
+      peer0.chemist.dawaTrace.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: false

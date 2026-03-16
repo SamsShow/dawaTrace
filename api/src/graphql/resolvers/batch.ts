@@ -6,11 +6,13 @@ export const batchResolvers = {
     batch: async (_: unknown, args: { batchId: string }) => {
       return fabricClient.getBatch(args.batchId);
     },
+    batches: async () => {
+      return fabricClient.listBatches();
+    },
     recall: async (_: unknown, args: { batchId: string }) => {
       return fabricClient.getRecall(args.batchId);
     },
     anomalies: async () => {
-      // TODO: implement anomaly detection (batch in 2 cities simultaneously, qty inflation)
       return [];
     },
   },

@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, AlertTriangle, BarChart2, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, AlertTriangle, BarChart2, LogOut } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
 
 const NAV = [
   { to: '/', label: 'Overview', icon: LayoutDashboard },
+  { to: '/batches', label: 'Batches', icon: Package },
   { to: '/recalls', label: 'Recalls', icon: AlertTriangle },
   { to: '/analytics', label: 'Analytics', icon: BarChart2 },
 ];

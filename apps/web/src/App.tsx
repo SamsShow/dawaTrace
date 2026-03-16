@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
+import Batches from './pages/Batches';
 import BatchDetail from './pages/BatchDetail';
 import Recalls from './pages/Recalls';
 import Analytics from './pages/Analytics';
@@ -17,6 +18,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/batches" element={<ProtectedRoute><Batches /></ProtectedRoute>} />
         <Route path="/batches/:batchId" element={<ProtectedRoute><BatchDetail /></ProtectedRoute>} />
         <Route path="/recalls" element={<ProtectedRoute><Recalls /></ProtectedRoute>} />
         <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />

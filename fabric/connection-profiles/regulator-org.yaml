@@ -1,0 +1,54 @@
+name: dawaTrace-regulator-org
+version: 1.0.0
+client:
+  organization: RegulatorOrg
+  connection:
+    timeout:
+      peer:
+        endorser: 300
+      orderer: 300
+
+organizations:
+  RegulatorOrg:
+    mspid: RegulatorOrgMSP
+    peers:
+      - peer0.regulator.dawaTrace.com
+    certificateAuthorities:
+      - ca.regulator.dawaTrace.com
+
+peers:
+  peer0.regulator.dawaTrace.com:
+    url: grpcs://peer0.regulator.dawaTrace.com:10051
+    tlsCACerts:
+      path: /fabric/crypto-config/peerOrganizations/regulator.dawaTrace.com/tlsca/tlsca.regulator.dawaTrace.com-cert.pem
+    grpcOptions:
+      ssl-target-name-override: peer0.regulator.dawaTrace.com
+      hostnameOverride: peer0.regulator.dawaTrace.com
+
+orderers:
+  orderer.dawaTrace.com:
+    url: grpcs://orderer.dawaTrace.com:7050
+    tlsCACerts:
+      path: /fabric/crypto-config/ordererOrganizations/dawaTrace.com/tlsca/tlsca.dawaTrace.com-cert.pem
+    grpcOptions:
+      ssl-target-name-override: orderer.dawaTrace.com
+
+certificateAuthorities:
+  ca.regulator.dawaTrace.com:
+    url: https://ca.regulator.dawaTrace.com:10054
+    caName: ca-regulator
+    tlsCACerts:
+      path: /fabric/crypto-config/peerOrganizations/regulator.dawaTrace.com/ca/ca.regulator.dawaTrace.com-cert.pem
+    httpOptions:
+      verify: false
+
+channels:
+  dawaTrace-channel:
+    orderers:
+      - orderer.dawaTrace.com
+    peers:
+      peer0.regulator.dawaTrace.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true

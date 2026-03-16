@@ -3,6 +3,11 @@ import { AuthenticatedUser } from '../../rest/middleware/auth.js';
 import { logger } from '../../logger.js';
 
 export const recallResolvers = {
+  Query: {
+    recalls: async () => {
+      return fabricClient.listRecalls();
+    },
+  },
   Mutation: {
     issueRecall: async (
       _: unknown,

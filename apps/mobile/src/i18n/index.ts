@@ -2,12 +2,47 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import en from './locales/en.json';
 import hi from './locales/hi.json';
+import ta from './locales/ta.json';
+import te from './locales/te.json';
+import bn from './locales/bn.json';
+import mr from './locales/mr.json';
+import gu from './locales/gu.json';
+import kn from './locales/kn.json';
+import ml from './locales/ml.json';
+import pa from './locales/pa.json';
+import or from './locales/or.json';
 
-// TODO: Add remaining 9 languages (ta, te, bn, mr, gu, kn, ml, pa, or)
+export const SUPPORTED_LANGUAGES = [
+  { code: 'hi', label: 'हिन्दी' },
+  { code: 'en', label: 'English' },
+  { code: 'ta', label: 'தமிழ்' },
+  { code: 'te', label: 'తెలుగు' },
+  { code: 'bn', label: 'বাংলা' },
+  { code: 'mr', label: 'मराठी' },
+  { code: 'gu', label: 'ગુજરાતી' },
+  { code: 'kn', label: 'ಕನ್ನಡ' },
+  { code: 'ml', label: 'മലയാളം' },
+  { code: 'pa', label: 'ਪੰਜਾਬੀ' },
+  { code: 'or', label: 'ଓଡ଼ିଆ' },
+] as const;
+
+export type LanguageCode = (typeof SUPPORTED_LANGUAGES)[number]['code'];
 
 i18n.use(initReactI18next).init({
-  resources: { en: { translation: en }, hi: { translation: hi } },
-  lng: 'hi', // Default to Hindi
+  resources: {
+    en: { translation: en },
+    hi: { translation: hi },
+    ta: { translation: ta },
+    te: { translation: te },
+    bn: { translation: bn },
+    mr: { translation: mr },
+    gu: { translation: gu },
+    kn: { translation: kn },
+    ml: { translation: ml },
+    pa: { translation: pa },
+    or: { translation: or },
+  },
+  lng: 'hi',
   fallbackLng: 'en',
   interpolation: { escapeValue: false },
 });

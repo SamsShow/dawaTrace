@@ -1,0 +1,54 @@
+name: dawaTrace-mfg-org
+version: 1.0.0
+client:
+  organization: MfgOrg
+  connection:
+    timeout:
+      peer:
+        endorser: 300
+      orderer: 300
+
+organizations:
+  MfgOrg:
+    mspid: MfgOrgMSP
+    peers:
+      - peer0.mfg.dawaTrace.com
+    certificateAuthorities:
+      - ca.mfg.dawaTrace.com
+
+peers:
+  peer0.mfg.dawaTrace.com:
+    url: grpcs://peer0.mfg.dawaTrace.com:7051
+    tlsCACerts:
+      path: /fabric/crypto-config/peerOrganizations/mfg.dawaTrace.com/tlsca/tlsca.mfg.dawaTrace.com-cert.pem
+    grpcOptions:
+      ssl-target-name-override: peer0.mfg.dawaTrace.com
+      hostnameOverride: peer0.mfg.dawaTrace.com
+
+orderers:
+  orderer.dawaTrace.com:
+    url: grpcs://orderer.dawaTrace.com:7050
+    tlsCACerts:
+      path: /fabric/crypto-config/ordererOrganizations/dawaTrace.com/tlsca/tlsca.dawaTrace.com-cert.pem
+    grpcOptions:
+      ssl-target-name-override: orderer.dawaTrace.com
+
+certificateAuthorities:
+  ca.mfg.dawaTrace.com:
+    url: https://ca.mfg.dawaTrace.com:7054
+    caName: ca-mfg
+    tlsCACerts:
+      path: /fabric/crypto-config/peerOrganizations/mfg.dawaTrace.com/ca/ca.mfg.dawaTrace.com-cert.pem
+    httpOptions:
+      verify: false
+
+channels:
+  dawaTrace-channel:
+    orderers:
+      - orderer.dawaTrace.com
+    peers:
+      peer0.mfg.dawaTrace.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
