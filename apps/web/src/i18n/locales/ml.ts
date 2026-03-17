@@ -1,0 +1,61 @@
+export default {
+  nav: {
+    overview: 'അവലോകനം',
+    batches: 'ബാച്ചുകൾ',
+    recalls: 'തിരിച്ചുവിളിക്കൽ',
+    analytics: 'വിശകലനം',
+  },
+  sidebar: {
+    subtitle: 'റെഗുലേറ്ററി ഡാഷ്‌ബോർഡ്',
+    signOut: 'സൈൻ ഔട്ട്',
+  },
+  dashboard: {
+    title: 'അവലോകനം',
+    activeRecalls: 'സജീവ തിരിച്ചുവിളിക്കലുകൾ',
+    recentBatches: 'സമീപകാല ബാച്ചുകൾ',
+    viewAll: 'എല്ലാം കാണുക',
+    noBatches: 'ഇതുവരെ ചെയിനിൽ ബാച്ചുകളൊന്നുമില്ല.',
+    mintFirst: 'ആദ്യ ബാച്ച് സൃഷ്ടിക്കുക',
+    stats: {
+      activeBatches: 'സജീവ ബാച്ചുകൾ',
+      recalledBatches: 'തിരിച്ചുവിളിച്ച ബാച്ചുകൾ',
+      totalOnChain: 'ചെയിനിൽ ആകെ',
+      suiAnchored: 'Sui ആങ്കർ',
+    },
+  },
+  batches: {
+    title: 'ബാച്ചുകൾ',
+    mint: 'ബാച്ച് സൃഷ്ടിക്കുക',
+    search: 'ബാച്ചുകൾ തിരയുക…',
+    noResults: 'ബാച്ചുകളൊന്നും കണ്ടെത്തിയില്ല.',
+  },
+  recalls: {
+    title: 'തിരിച്ചുവിളിക്കൽ',
+    issue: 'തിരിച്ചുവിളിക്കൽ നൽകുക',
+    noRecalls: 'സജീവ തിരിച്ചുവിളിക്കലുകളൊന്നുമില്ല.',
+    columns: {
+      batch: 'ബാച്ച്',
+      reason: 'കാരണം',
+      issuedBy: 'നൽകിയത്',
+      date: 'തീയതി',
+      sui: 'Sui',
+    },
+  },
+  analytics: { title: 'വിശകലനം' },
+  common: {
+    loading: 'ലോഡ് ആകുന്നു…',
+    error: 'പിശക്',
+    save: 'സേവ് ചെയ്യുക',
+    cancel: 'റദ്ദാക്കുക',
+    search: 'തിരയുക',
+    filter: 'ഫിൽറ്റർ',
+    viewDetails: 'വിശദാംശങ്ങൾ കാണുക',
+  },
+  status: {
+    ACTIVE: 'സജീവം',
+    IN_TRANSIT: 'ഗതാഗതത്തിൽ',
+    DISPENSED: 'വിതരണം ചെയ്തു',
+    RECALLED: 'തിരിച്ചുവിളിച്ചു',
+    SUSPENDED_REVIEW: 'സസ്പെൻഡ് അവലോകനം',
+  },
+} as const;

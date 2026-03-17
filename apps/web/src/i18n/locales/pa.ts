@@ -1,0 +1,61 @@
+export default {
+  nav: {
+    overview: 'ਸੰਖੇਪ ਜਾਣਕਾਰੀ',
+    batches: 'ਬੈਚ',
+    recalls: 'ਵਾਪਸੀ',
+    analytics: 'ਵਿਸ਼ਲੇਸ਼ਣ',
+  },
+  sidebar: {
+    subtitle: 'ਰੈਗੂਲੇਟਰੀ ਡੈਸ਼ਬੋਰਡ',
+    signOut: 'ਸਾਈਨ ਆਉਟ',
+  },
+  dashboard: {
+    title: 'ਸੰਖੇਪ ਜਾਣਕਾਰੀ',
+    activeRecalls: 'ਸਰਗਰਮ ਵਾਪਸੀਆਂ',
+    recentBatches: 'ਹਾਲੀਆ ਬੈਚ',
+    viewAll: 'ਸਭ ਦੇਖੋ',
+    noBatches: 'ਅਜੇ ਚੇਨ ਤੇ ਕੋਈ ਬੈਚ ਨਹੀਂ।',
+    mintFirst: 'ਪਹਿਲਾ ਬੈਚ ਬਣਾਓ',
+    stats: {
+      activeBatches: 'ਸਰਗਰਮ ਬੈਚ',
+      recalledBatches: 'ਵਾਪਸ ਕੀਤੇ ਬੈਚ',
+      totalOnChain: 'ਚੇਨ ਤੇ ਕੁੱਲ',
+      suiAnchored: 'Sui ਐਂਕਰ',
+    },
+  },
+  batches: {
+    title: 'ਬੈਚ',
+    mint: 'ਬੈਚ ਬਣਾਓ',
+    search: 'ਬੈਚ ਲੱਭੋ…',
+    noResults: 'ਕੋਈ ਬੈਚ ਨਹੀਂ ਮਿਲਿਆ।',
+  },
+  recalls: {
+    title: 'ਵਾਪਸੀ',
+    issue: 'ਵਾਪਸੀ ਜਾਰੀ ਕਰੋ',
+    noRecalls: 'ਕੋਈ ਸਰਗਰਮ ਵਾਪਸੀ ਨਹੀਂ।',
+    columns: {
+      batch: 'ਬੈਚ',
+      reason: 'ਕਾਰਨ',
+      issuedBy: 'ਜਾਰੀਕਰਤਾ',
+      date: 'ਤਾਰੀਖ',
+      sui: 'Sui',
+    },
+  },
+  analytics: { title: 'ਵਿਸ਼ਲੇਸ਼ਣ' },
+  common: {
+    loading: 'ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…',
+    error: 'ਗਲਤੀ',
+    save: 'ਸੁਰੱਖਿਅਤ ਕਰੋ',
+    cancel: 'ਰੱਦ ਕਰੋ',
+    search: 'ਖੋਜੋ',
+    filter: 'ਫਿਲਟਰ',
+    viewDetails: 'ਵੇਰਵੇ ਦੇਖੋ',
+  },
+  status: {
+    ACTIVE: 'ਸਰਗਰਮ',
+    IN_TRANSIT: 'ਆਵਾਜਾਈ ਵਿੱਚ',
+    DISPENSED: 'ਵੰਡਿਆ ਗਿਆ',
+    RECALLED: 'ਵਾਪਸ ਕੀਤਾ',
+    SUSPENDED_REVIEW: 'ਮੁਅੱਤਲ ਸਮੀਖਿਆ',
+  },
+} as const;

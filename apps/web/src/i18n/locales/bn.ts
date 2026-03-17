@@ -1,0 +1,61 @@
+export default {
+  nav: {
+    overview: 'সংক্ষিপ্ত বিবরণ',
+    batches: 'ব্যাচ',
+    recalls: 'প্রত্যাহার',
+    analytics: 'বিশ্লেষণ',
+  },
+  sidebar: {
+    subtitle: 'নিয়ন্ত্রণ ড্যাশবোর্ড',
+    signOut: 'সাইন আউট',
+  },
+  dashboard: {
+    title: 'সংক্ষিপ্ত বিবরণ',
+    activeRecalls: 'সক্রিয় প্রত্যাহার',
+    recentBatches: 'সাম্প্রতিক ব্যাচ',
+    viewAll: 'সব দেখুন',
+    noBatches: 'এখনো চেইনে কোনো ব্যাচ নেই।',
+    mintFirst: 'প্রথম ব্যাচ তৈরি করুন',
+    stats: {
+      activeBatches: 'সক্রিয় ব্যাচ',
+      recalledBatches: 'প্রত্যাহৃত ব্যাচ',
+      totalOnChain: 'চেইনে মোট',
+      suiAnchored: 'Sui নোঙর',
+    },
+  },
+  batches: {
+    title: 'ব্যাচ',
+    mint: 'ব্যাচ তৈরি করুন',
+    search: 'ব্যাচ খুঁজুন…',
+    noResults: 'কোনো ব্যাচ পাওয়া যায়নি।',
+  },
+  recalls: {
+    title: 'প্রত্যাহার',
+    issue: 'প্রত্যাহার জারি করুন',
+    noRecalls: 'কোনো সক্রিয় প্রত্যাহার নেই।',
+    columns: {
+      batch: 'ব্যাচ',
+      reason: 'কারণ',
+      issuedBy: 'জারি করেছেন',
+      date: 'তারিখ',
+      sui: 'Sui',
+    },
+  },
+  analytics: { title: 'বিশ্লেষণ' },
+  common: {
+    loading: 'লোড হচ্ছে…',
+    error: 'ত্রুটি',
+    save: 'সংরক্ষণ',
+    cancel: 'বাতিল',
+    search: 'খুঁজুন',
+    filter: 'ফিল্টার',
+    viewDetails: 'বিবরণ দেখুন',
+  },
+  status: {
+    ACTIVE: 'সক্রিয়',
+    IN_TRANSIT: 'পরিবহনে',
+    DISPENSED: 'বিতরণ করা হয়েছে',
+    RECALLED: 'প্রত্যাহৃত',
+    SUSPENDED_REVIEW: 'স্থগিত পর্যালোচনা',
+  },
+} as const;

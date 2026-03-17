@@ -1,0 +1,61 @@
+export default {
+  nav: {
+    overview: 'વિહંગાવલોકન',
+    batches: 'બૅચ',
+    recalls: 'પાછા બોલાવો',
+    analytics: 'વિશ્લેષણ',
+  },
+  sidebar: {
+    subtitle: 'નિયમનકારી ડૅશબોર્ડ',
+    signOut: 'સાઇન આઉટ',
+  },
+  dashboard: {
+    title: 'વિહંગાવલોકન',
+    activeRecalls: 'સક્રિય પાછા બોલાવો',
+    recentBatches: 'તાજેતરના બૅચ',
+    viewAll: 'બધું જુઓ',
+    noBatches: 'હજુ ચેઇન પર કોઈ બૅચ નથી.',
+    mintFirst: 'પ્રથમ બૅચ બનાવો',
+    stats: {
+      activeBatches: 'સક્રિય બૅચ',
+      recalledBatches: 'પાછા બોલાવેલ બૅચ',
+      totalOnChain: 'ચેઇન પર કુલ',
+      suiAnchored: 'Sui એન્કર',
+    },
+  },
+  batches: {
+    title: 'બૅચ',
+    mint: 'બૅચ બનાવો',
+    search: 'બૅચ શોધો…',
+    noResults: 'કોઈ બૅચ મળ્યો નથી.',
+  },
+  recalls: {
+    title: 'પાછા બોલાવો',
+    issue: 'પાછા બોલાવો જારી કરો',
+    noRecalls: 'કોઈ સક્રિય પાછા બોલાવો નથી.',
+    columns: {
+      batch: 'બૅચ',
+      reason: 'કારણ',
+      issuedBy: 'જારી કર્યું',
+      date: 'તારીખ',
+      sui: 'Sui',
+    },
+  },
+  analytics: { title: 'વિશ્લેષણ' },
+  common: {
+    loading: 'લોડ થઈ રહ્યું છે…',
+    error: 'ભૂલ',
+    save: 'સાચવો',
+    cancel: 'રદ કરો',
+    search: 'શોધો',
+    filter: 'ફિલ્ટર',
+    viewDetails: 'વિગતો જુઓ',
+  },
+  status: {
+    ACTIVE: 'સક્રિય',
+    IN_TRANSIT: 'પરિવહનમાં',
+    DISPENSED: 'વિતરિત',
+    RECALLED: 'પાછો બોલાવ્યો',
+    SUSPENDED_REVIEW: 'સસ્પેન્ડ સમીક્ષા',
+  },
+} as const;

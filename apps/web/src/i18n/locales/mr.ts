@@ -1,0 +1,61 @@
+export default {
+  nav: {
+    overview: 'आढावा',
+    batches: 'बॅचेस',
+    recalls: 'परत बोलावणे',
+    analytics: 'विश्लेषण',
+  },
+  sidebar: {
+    subtitle: 'नियामक डॅशबोर्ड',
+    signOut: 'साइन आउट',
+  },
+  dashboard: {
+    title: 'आढावा',
+    activeRecalls: 'सक्रिय परत बोलावणे',
+    recentBatches: 'अलीकडील बॅचेस',
+    viewAll: 'सर्व पहा',
+    noBatches: 'अद्याप साखळीवर कोणतेही बॅच नाहीत.',
+    mintFirst: 'पहिला बॅच तयार करा',
+    stats: {
+      activeBatches: 'सक्रिय बॅचेस',
+      recalledBatches: 'परत बोलावलेले बॅचेस',
+      totalOnChain: 'साखळीवर एकूण',
+      suiAnchored: 'Sui अँकर',
+    },
+  },
+  batches: {
+    title: 'बॅचेस',
+    mint: 'बॅच तयार करा',
+    search: 'बॅचेस शोधा…',
+    noResults: 'कोणतेही बॅचेस आढळले नाहीत.',
+  },
+  recalls: {
+    title: 'परत बोलावणे',
+    issue: 'परत बोलावणे जारी करा',
+    noRecalls: 'कोणतेही सक्रिय परत बोलावणे नाही.',
+    columns: {
+      batch: 'बॅच',
+      reason: 'कारण',
+      issuedBy: 'जारी केले',
+      date: 'तारीख',
+      sui: 'Sui',
+    },
+  },
+  analytics: { title: 'विश्लेषण' },
+  common: {
+    loading: 'लोड होत आहे…',
+    error: 'त्रुटी',
+    save: 'जतन करा',
+    cancel: 'रद्द करा',
+    search: 'शोधा',
+    filter: 'फिल्टर',
+    viewDetails: 'तपशील पहा',
+  },
+  status: {
+    ACTIVE: 'सक्रिय',
+    IN_TRANSIT: 'वाहतुकीत',
+    DISPENSED: 'वितरित',
+    RECALLED: 'परत बोलावले',
+    SUSPENDED_REVIEW: 'निलंबित पुनरावलोकन',
+  },
+} as const;

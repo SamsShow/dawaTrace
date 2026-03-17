@@ -1,0 +1,61 @@
+export default {
+  nav: {
+    overview: 'అవలోకనం',
+    batches: 'బ్యాచ్‌లు',
+    recalls: 'రీకాల్స్',
+    analytics: 'విశ్లేషణలు',
+  },
+  sidebar: {
+    subtitle: 'నియంత్రణ డాష్‌బోర్డ్',
+    signOut: 'సైన్ అవుట్',
+  },
+  dashboard: {
+    title: 'అవలోకనం',
+    activeRecalls: 'క్రియాశీల రీకాల్స్',
+    recentBatches: 'ఇటీవలి బ్యాచ్‌లు',
+    viewAll: 'అన్నీ చూడండి',
+    noBatches: 'ఇంకా చైన్‌లో బ్యాచ్‌లు లేవు.',
+    mintFirst: 'మొదటి బ్యాచ్ సృష్టించండి',
+    stats: {
+      activeBatches: 'క్రియాశీల బ్యాచ్‌లు',
+      recalledBatches: 'రీకాల్ చేసిన బ్యాచ్‌లు',
+      totalOnChain: 'మొత్తం చైన్‌లో',
+      suiAnchored: 'Sui యాంకర్డ్',
+    },
+  },
+  batches: {
+    title: 'బ్యాచ్‌లు',
+    mint: 'బ్యాచ్ సృష్టించు',
+    search: 'బ్యాచ్‌లు వెతకండి…',
+    noResults: 'బ్యాచ్‌లు కనుగొనబడలేదు.',
+  },
+  recalls: {
+    title: 'రీకాల్స్',
+    issue: 'రీకాల్ జారీ చేయి',
+    noRecalls: 'క్రియాశీల రీకాల్స్ లేవు.',
+    columns: {
+      batch: 'బ్యాచ్',
+      reason: 'కారణం',
+      issuedBy: 'జారీ చేసినవారు',
+      date: 'తేదీ',
+      sui: 'Sui',
+    },
+  },
+  analytics: { title: 'విశ్లేషణలు' },
+  common: {
+    loading: 'లోడవుతోంది…',
+    error: 'లోపం',
+    save: 'సేవ్ చేయి',
+    cancel: 'రద్దు',
+    search: 'వెతకు',
+    filter: 'ఫిల్టర్',
+    viewDetails: 'వివరాలు చూడండి',
+  },
+  status: {
+    ACTIVE: 'క్రియాశీల',
+    IN_TRANSIT: 'రవాణాలో',
+    DISPENSED: 'పంపిణీ చేయబడింది',
+    RECALLED: 'రీకాల్ చేయబడింది',
+    SUSPENDED_REVIEW: 'సస్పెండ్ సమీక్ష',
+  },
+} as const;

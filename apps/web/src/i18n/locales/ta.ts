@@ -1,0 +1,61 @@
+export default {
+  nav: {
+    overview: 'கண்ணோட்டம்',
+    batches: 'தொகுதிகள்',
+    recalls: 'திரும்பப்பெறல்',
+    analytics: 'பகுப்பாய்வு',
+  },
+  sidebar: {
+    subtitle: 'ஒழுங்குமுறை டாஷ்போர்டு',
+    signOut: 'வெளியேறு',
+  },
+  dashboard: {
+    title: 'கண்ணோட்டம்',
+    activeRecalls: 'செயலில் உள்ள திரும்பப்பெறல்கள்',
+    recentBatches: 'சமீபத்திய தொகுதிகள்',
+    viewAll: 'அனைத்தும் காண்க',
+    noBatches: 'இதுவரை சங்கிலியில் தொகுதிகள் இல்லை.',
+    mintFirst: 'முதல் தொகுதியை உருவாக்கு',
+    stats: {
+      activeBatches: 'செயலில் உள்ள தொகுதிகள்',
+      recalledBatches: 'திரும்பப்பெறப்பட்ட தொகுதிகள்',
+      totalOnChain: 'மொத்தம் சங்கிலியில்',
+      suiAnchored: 'Sui நங்கூரம்',
+    },
+  },
+  batches: {
+    title: 'தொகுதிகள்',
+    mint: 'தொகுதி உருவாக்கு',
+    search: 'தொகுதிகளை தேடு…',
+    noResults: 'தொகுதிகள் எதுவும் இல்லை.',
+  },
+  recalls: {
+    title: 'திரும்பப்பெறல்',
+    issue: 'திரும்பப்பெறல் வழங்கு',
+    noRecalls: 'செயலில் உள்ள திரும்பப்பெறல்கள் இல்லை.',
+    columns: {
+      batch: 'தொகுதி',
+      reason: 'காரணம்',
+      issuedBy: 'வழங்கியவர்',
+      date: 'தேதி',
+      sui: 'Sui',
+    },
+  },
+  analytics: { title: 'பகுப்பாய்வு' },
+  common: {
+    loading: 'ஏற்றுகிறது…',
+    error: 'பிழை',
+    save: 'சேமி',
+    cancel: 'ரத்து',
+    search: 'தேடு',
+    filter: 'வடிகட்டு',
+    viewDetails: 'விவரங்களை காண்க',
+  },
+  status: {
+    ACTIVE: 'செயலில்',
+    IN_TRANSIT: 'வழியில்',
+    DISPENSED: 'வழங்கப்பட்டது',
+    RECALLED: 'திரும்பப்பெறப்பட்டது',
+    SUSPENDED_REVIEW: 'நிறுத்தப்பட்ட மதிப்பாய்வு',
+  },
+} as const;

@@ -6,6 +6,7 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { createClient } from 'graphql-ws';
 import App from './App';
 import './index.css';
+import './i18n';
 
 const httpLink = new HttpLink({ uri: '/graphql' });
 

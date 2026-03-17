@@ -1,25 +1,28 @@
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Package, AlertTriangle, BarChart2, LogOut } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
 import ThemeToggle from './ThemeToggle';
-
-const NAV = [
-  { to: '/dashboard', label: 'Overview', icon: LayoutDashboard },
-  { to: '/batches', label: 'Batches', icon: Package },
-  { to: '/recalls', label: 'Recalls', icon: AlertTriangle },
-  { to: '/analytics', label: 'Analytics', icon: BarChart2 },
-];
+import LanguageSelector from './LanguageSelector';
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
+
+  const NAV = [
+    { to: '/dashboard', label: t('nav.overview'), icon: LayoutDashboard },
+    { to: '/batches', label: t('nav.batches'), icon: Package },
+    { to: '/recalls', label: t('nav.recalls'), icon: AlertTriangle },
+    { to: '/analytics', label: t('nav.analytics'), icon: BarChart2 },
+  ];
 
   return (
     <aside className="w-52 shrink-0 bg-background border-r border-border flex flex-col h-screen sticky top-0">
       <div className="px-4 py-4">
         <span className="text-sm font-semibold tracking-tight">DawaTrace</span>
-        <p className="text-[11px] text-muted-foreground mt-0.5">Regulatory Dashboard</p>
+        <p className="text-[11px] text-muted-foreground mt-0.5">{t('sidebar.subtitle')}</p>
       </div>
 
       <Separator />
@@ -56,9 +59,12 @@ export default function Sidebar() {
             className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             <LogOut className="h-3 w-3" />
-            Sign out
+            {t('sidebar.signOut')}
           </button>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <LanguageSelector />
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </aside>

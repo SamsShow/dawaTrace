@@ -1,0 +1,61 @@
+export default {
+  nav: {
+    overview: 'ಅವಲೋಕನ',
+    batches: 'ಬ್ಯಾಚ್‌ಗಳು',
+    recalls: 'ಹಿಂಪಡೆಯುವಿಕೆ',
+    analytics: 'ವಿಶ್ಲೇಷಣೆ',
+  },
+  sidebar: {
+    subtitle: 'ನಿಯಂತ್ರಕ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್',
+    signOut: 'ಸೈನ್ ಔಟ್',
+  },
+  dashboard: {
+    title: 'ಅವಲೋಕನ',
+    activeRecalls: 'ಸಕ್ರಿಯ ಹಿಂಪಡೆಯುವಿಕೆಗಳು',
+    recentBatches: 'ಇತ್ತೀಚಿನ ಬ್ಯಾಚ್‌ಗಳು',
+    viewAll: 'ಎಲ್ಲಾ ನೋಡಿ',
+    noBatches: 'ಇನ್ನೂ ಚೈನ್‌ನಲ್ಲಿ ಬ್ಯಾಚ್‌ಗಳಿಲ್ಲ.',
+    mintFirst: 'ಮೊದಲ ಬ್ಯಾಚ್ ರಚಿಸಿ',
+    stats: {
+      activeBatches: 'ಸಕ್ರಿಯ ಬ್ಯಾಚ್‌ಗಳು',
+      recalledBatches: 'ಹಿಂಪಡೆದ ಬ್ಯಾಚ್‌ಗಳು',
+      totalOnChain: 'ಚೈನ್‌ನಲ್ಲಿ ಒಟ್ಟು',
+      suiAnchored: 'Sui ಲಂಗರು',
+    },
+  },
+  batches: {
+    title: 'ಬ್ಯಾಚ್‌ಗಳು',
+    mint: 'ಬ್ಯಾಚ್ ರಚಿಸಿ',
+    search: 'ಬ್ಯಾಚ್‌ಗಳನ್ನು ಹುಡುಕಿ…',
+    noResults: 'ಯಾವುದೇ ಬ್ಯಾಚ್‌ಗಳು ಕಂಡುಬಂದಿಲ್ಲ.',
+  },
+  recalls: {
+    title: 'ಹಿಂಪಡೆಯುವಿಕೆ',
+    issue: 'ಹಿಂಪಡೆಯುವಿಕೆ ನೀಡಿ',
+    noRecalls: 'ಸಕ್ರಿಯ ಹಿಂಪಡೆಯುವಿಕೆಗಳಿಲ್ಲ.',
+    columns: {
+      batch: 'ಬ್ಯಾಚ್',
+      reason: 'ಕಾರಣ',
+      issuedBy: 'ನೀಡಿದವರು',
+      date: 'ದಿನಾಂಕ',
+      sui: 'Sui',
+    },
+  },
+  analytics: { title: 'ವಿಶ್ಲೇಷಣೆ' },
+  common: {
+    loading: 'ಲೋಡ್ ಆಗುತ್ತಿದೆ…',
+    error: 'ದೋಷ',
+    save: 'ಉಳಿಸಿ',
+    cancel: 'ರದ್ದುಮಾಡಿ',
+    search: 'ಹುಡುಕಿ',
+    filter: 'ಫಿಲ್ಟರ್',
+    viewDetails: 'ವಿವರಗಳನ್ನು ನೋಡಿ',
+  },
+  status: {
+    ACTIVE: 'ಸಕ್ರಿಯ',
+    IN_TRANSIT: 'ಸಾಗಣೆಯಲ್ಲಿ',
+    DISPENSED: 'ವಿತರಿಸಲಾಗಿದೆ',
+    RECALLED: 'ಹಿಂಪಡೆಯಲಾಗಿದೆ',
+    SUSPENDED_REVIEW: 'ಅಮಾನತು ಪರಿಶೀಲನೆ',
+  },
+} as const;
