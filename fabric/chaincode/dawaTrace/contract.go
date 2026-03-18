@@ -455,3 +455,149 @@ func (s *SmartContract) GetRecall(
 	}
 	return &recall, nil
 }
+
+// GetAllBatches returns all batch records from the ledger by scanning keys with the BATCH_ prefix.
+func (s *SmartContract) GetAllBatches(ctx contractapi.TransactionContextInterface) ([]*Batch, error) {
+	// GetStateByRange with "BATCH_" to "BATCH_\xff" captures all BATCH_ prefixed keys.
+	resultsIterator, err := ctx.GetStub().GetStateByRange("BATCH_", "BATCH_\xff")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get batch range: %w", err)
+	}
+	defer resultsIterator.Close()
+
+	var batches []*Batch
+	for resultsIterator.HasNext() {
+		kv, err := resultsIterator.Next()
+		if err != nil {
+			return nil, fmt.Errorf("failed to iterate batches: %w", err)
+		}
+
+		var batch Batch
+		if err := jsonUnmarshal(kv.Value, &batch); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal batch at key %s: %w", kv.Key, err)
+		}
+		batches = append(batches, &batch)
+	}
+
+	if batches == nil {
+		batches = []*Batch{}
+	}
+	return batches, nil
+}
+
+// GetAllRecalls returns all recall records from the ledger by scanning keys with the RECALL_ prefix.
+func (s *SmartContract) GetAllRecalls(ctx contractapi.TransactionContextInterface) ([]*RecallRecord, error) {
+	resultsIterator, err := ctx.GetStub().GetStateByRange("RECALL_", "RECALL_\xff")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get recall range: %w", err)
+	}
+	defer resultsIterator.Close()
+
+	var recalls []*RecallRecord
+	for resultsIterator.HasNext() {
+		kv, err := resultsIterator.Next()
+		if err != nil {
+			return nil, fmt.Errorf("failed to iterate recalls: %w", err)
+		}
+
+		var recall RecallRecord
+		if err := jsonUnmarshal(kv.Value, &recall); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal recall at key %s: %w", kv.Key, err)
+		}
+		recalls = append(recalls, &recall)
+	}
+
+	if recalls == nil {
+		recalls = []*RecallRecord{}
+	}
+	return recalls, nil
+}
+
+// GetChemistViolation returns the violation record for a single chemist.
+func (s *SmartContract) GetChemistViolation(
+	ctx contractapi.TransactionContextInterface,
+	chemistID string,
+) (*ChemistViolation, error) {
+	data, err := ctx.GetStub().GetState("VIOLATION_" + chemistID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read violation record: %w", err)
+	}
+	if data == nil {
+		return nil, fmt.Errorf("no violation record found for chemist %s", chemistID)
+	}
+
+	var violation ChemistViolation
+	if err := jsonUnmarshal(data, &violation); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal violation: %w", err)
+	}
+	return &violation, nil
+}
+
+// GetAllChemistViolations returns all chemist violation records from the ledger.
+func (s *SmartContract) GetAllChemistViolations(ctx contractapi.TransactionContextInterface) ([]*ChemistViolation, error) {
+	resultsIterator, err := ctx.GetStub().GetStateByRange("VIOLATION_", "VIOLATION_\xff")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get violation range: %w", err)
+	}
+	defer resultsIterator.Close()
+
+	var violations []*ChemistViolation
+	for resultsIterator.HasNext() {
+		kv, err := resultsIterator.Next()
+		if err != nil {
+			return nil, fmt.Errorf("failed to iterate violations: %w", err)
+		}
+
+		var violation ChemistViolation
+		if err := jsonUnmarshal(kv.Value, &violation); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal violation at key %s: %w", kv.Key, err)
+		}
+		violations = append(violations, &violation)
+	}
+
+	if violations == nil {
+		violations = []*ChemistViolation{}
+	}
+	return violations, nil
+}
+
+// LiftSuspension resets a chemist's violation count and removes the suspension.
+// Only a regulator should call this (enforced via org MSP in production).
+func (s *SmartContract) LiftSuspension(
+	ctx contractapi.TransactionContextInterface,
+	chemistID string,
+	regulatorID string,
+) error {
+	key := "VIOLATION_" + chemistID
+	data, err := ctx.GetStub().GetState(key)
+	if err != nil {
+		return fmt.Errorf("failed to read violation record: %w", err)
+	}
+	if data == nil {
+		return fmt.Errorf("no violation record found for chemist %s", chemistID)
+	}
+
+	var violation ChemistViolation
+	if err := jsonUnmarshal(data, &violation); err != nil {
+		return fmt.Errorf("failed to unmarshal violation: %w", err)
+	}
+
+	if !violation.Suspended {
+		return fmt.Errorf("chemist %s is not currently suspended", chemistID)
+	}
+
+	violation.ViolationCount = 0
+	violation.Suspended = false
+	violation.ViolationBatchIDs = []string{}
+	violation.LastViolationAt = now()
+
+	violationBytes, err := jsonMarshal(violation)
+	if err != nil {
+		return fmt.Errorf("failed to marshal violation: %w", err)
+	}
+	if err := ctx.GetStub().PutState(key, violationBytes); err != nil {
+		return fmt.Errorf("failed to write violation record: %w", err)
+	}
+
+	return nil
+}

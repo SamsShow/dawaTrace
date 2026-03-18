@@ -57,6 +57,36 @@ export const typeDefs = `#graphql
     detectedAt: Float!
   }
 
+  type ChemistViolation {
+    chemistId: String!
+    violationCount: Int!
+    suspended: Boolean!
+    violationBatchIds: [String!]!
+    lastViolationAt: Float!
+  }
+
+  type StatusCount {
+    status: String!
+    count: Int!
+  }
+
+  type ActivityPoint {
+    date: String!
+    batches: Int!
+    recalls: Int!
+  }
+
+  type AnalyticsData {
+    totalBatches: Int!
+    activeBatches: Int!
+    recalledBatches: Int!
+    inTransitBatches: Int!
+    dispensedBatches: Int!
+    totalRecalls: Int!
+    statusDistribution: [StatusCount!]!
+    recentActivity: [ActivityPoint!]!
+  }
+
   type Query {
     batch(batchId: String!): Batch
     batches: [Batch!]!
@@ -64,6 +94,11 @@ export const typeDefs = `#graphql
     recalls: [RecallRecord!]!
     verifyBatch(suiObjectId: String!): BatchVerification
     anomalies(limit: Int): [AnomalyAlert!]!
+    chemistViolations: [ChemistViolation!]!
+    chemistViolation(chemistId: String!): ChemistViolation
+    analytics: AnalyticsData!
+    reports: [Report!]!
+    report(id: String!): Report
   }
 
   type Mutation {
@@ -92,11 +127,35 @@ export const typeDefs = `#graphql
       chemistId: String!
       batchId: String!
     ): MutationResult!
+
+    liftSuspension(chemistId: String!): MutationResult!
+
+    bulkRecall(batchIds: [String!]!, reason: String!): MutationResult!
+
+    submitReport(batchId: String!, reason: String!, reporterAddress: String): MutationResult!
+    resolveReport(id: String!, status: ReportStatus!): MutationResult!
   }
 
   type MutationResult {
     success: Boolean!
     message: String!
+  }
+
+  type Report {
+    id: String!
+    batchId: String!
+    reporterAddress: String!
+    reason: String!
+    status: ReportStatus!
+    createdAt: Float!
+    resolvedAt: Float
+    pointsAwarded: Int
+  }
+
+  enum ReportStatus {
+    PENDING
+    CONFIRMED
+    REJECTED
   }
 
   type Subscription {

@@ -3,6 +3,7 @@ import { config } from './config.js';
 import { logger } from './logger.js';
 import { RetryQueue } from './queue.js';
 import { BridgeRelay } from './relay.js';
+import { registry, queueDepth } from './metrics.js';
 
 /**
  * Starts an HTTP health server for C-DAC ops monitoring.
@@ -17,6 +18,21 @@ export function startHealthServer(relay: BridgeRelay, queue: RetryQueue): void {
 
   app.get('/health', (_req, res) => {
     res.json({ status: 'ok', uptime: Date.now() - startTime });
+  });
+
+  // Prometheus metrics endpoint
+  app.get('/metrics', async (_req, res) => {
+    try {
+      // Update queue depth gauges before scraping
+      const depths = await queue.depths();
+      queueDepth.set({ priority: 'URGENT' }, depths.urgent);
+      queueDepth.set({ priority: 'NORMAL' }, depths.normal);
+
+      res.set('Content-Type', registry.contentType);
+      res.end(await registry.metrics());
+    } catch (err) {
+      res.status(500).end(String(err));
+    }
   });
 
   app.get('/ready', async (_req, res) => {

@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Package, AlertTriangle, BarChart2, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, AlertTriangle, BarChart2, Shield, Flag, LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { Separator } from './ui/separator';
@@ -16,6 +16,12 @@ export default function Sidebar() {
     { to: '/batches', label: t('nav.batches'), icon: Package },
     { to: '/recalls', label: t('nav.recalls'), icon: AlertTriangle },
     { to: '/analytics', label: t('nav.analytics'), icon: BarChart2 },
+    ...(user?.orgRole === 'REGULATOR'
+      ? [
+          { to: '/reports', label: t('nav.reports', 'Reports'), icon: Flag },
+          { to: '/admin', label: t('nav.admin'), icon: Shield },
+        ]
+      : []),
   ];
 
   return (

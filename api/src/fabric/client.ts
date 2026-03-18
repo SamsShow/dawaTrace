@@ -1,5 +1,5 @@
 import { getFabricContract } from './gateway.js';
-import { FabricBatch, FabricRecallRecord } from '../types/fabric.js';
+import { FabricBatch, FabricRecallRecord, FabricChemistViolation } from '../types/fabric.js';
 import { logger } from '../logger.js';
 
 const MOCK = process.env.MOCK_FABRIC === 'true';
@@ -187,7 +187,9 @@ export async function getBatch(batchId: string): Promise<FabricBatch> {
 
 export async function listBatches(): Promise<FabricBatch[]> {
   if (MOCK) return MOCK_BATCHES;
-  throw new Error('listBatches not implemented for Fabric yet');
+  const contract = await getFabricContract();
+  const result = await contract.evaluateTransaction('GetAllBatches');
+  return parseResult<FabricBatch[]>(result);
 }
 
 /**
@@ -206,5 +208,76 @@ export async function getRecall(batchId: string): Promise<FabricRecallRecord> {
 
 export async function listRecalls(): Promise<FabricRecallRecord[]> {
   if (MOCK) return MOCK_RECALLS;
-  throw new Error('listRecalls not implemented for Fabric yet');
+  const contract = await getFabricContract();
+  const result = await contract.evaluateTransaction('GetAllRecalls');
+  return parseResult<FabricRecallRecord[]>(result);
+}
+
+// --- Chemist violation management ---
+
+const MOCK_VIOLATIONS: FabricChemistViolation[] = [
+  {
+    chemistId: 'CHEM-MUM-0091',
+    violationCount: 3,
+    suspended: true,
+    violationBatchIds: ['BATCH-2026-003', 'BATCH-2026-007', 'BATCH-2026-012'],
+    lastViolationAt: now - 2 * 86400000,
+  },
+  {
+    chemistId: 'CHEM-DEL-0045',
+    violationCount: 1,
+    suspended: false,
+    violationBatchIds: ['BATCH-2026-005'],
+    lastViolationAt: now - 10 * 86400000,
+  },
+  {
+    chemistId: 'CHEM-BLR-0112',
+    violationCount: 2,
+    suspended: false,
+    violationBatchIds: ['BATCH-2026-002', 'BATCH-2026-009'],
+    lastViolationAt: now - 5 * 86400000,
+  },
+];
+
+/**
+ * Read a single chemist's violation record from Fabric.
+ */
+export async function getChemistViolation(chemistId: string): Promise<FabricChemistViolation> {
+  if (MOCK) {
+    const violation = MOCK_VIOLATIONS.find((v) => v.chemistId === chemistId);
+    if (!violation) throw new Error(`[MOCK] Violation record for ${chemistId} not found`);
+    return violation;
+  }
+  const contract = await getFabricContract();
+  const result = await contract.evaluateTransaction('GetChemistViolation', chemistId);
+  return parseResult<FabricChemistViolation>(result);
+}
+
+/**
+ * List all chemist violation records from Fabric.
+ */
+export async function listChemistViolations(): Promise<FabricChemistViolation[]> {
+  if (MOCK) return MOCK_VIOLATIONS;
+  const contract = await getFabricContract();
+  const result = await contract.evaluateTransaction('GetAllChemistViolations');
+  return parseResult<FabricChemistViolation[]>(result);
+}
+
+/**
+ * Lift a chemist's suspension — resets violation count and unsuspends.
+ * Only regulators should call this.
+ */
+export async function liftSuspension(params: {
+  chemistId: string;
+  regulatorId: string;
+}): Promise<void> {
+  if (MOCK) {
+    const violation = MOCK_VIOLATIONS.find((v) => v.chemistId === params.chemistId);
+    if (violation) violation.suspended = false;
+    logger.info({ chemistId: params.chemistId }, '[MOCK] LiftSuspension');
+    return;
+  }
+  const contract = await getFabricContract();
+  await contract.submitTransaction('LiftSuspension', params.chemistId, params.regulatorId);
+  logger.info({ chemistId: params.chemistId, regulatorId: params.regulatorId }, 'LiftSuspension submitted to Fabric');
 }

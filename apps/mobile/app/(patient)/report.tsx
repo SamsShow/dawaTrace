@@ -1,13 +1,14 @@
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import { useState } from 'react';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 const API_URL = process.env['EXPO_PUBLIC_API_URL'] ?? 'http://localhost:3000';
 
 export default function ReportScreen() {
   const { t } = useTranslation();
-  const [batchId, setBatchId] = useState('');
+  const params = useLocalSearchParams<{ batchId?: string }>();
+  const [batchId, setBatchId] = useState(params.batchId ?? '');
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -19,8 +20,19 @@ export default function ReportScreen() {
 
     setSubmitting(true);
     try {
-      // TODO: submit to API → Sui awardDawaPoints flow
-      // Anchor the report on Sui as permanent, timestamped evidence
+      const response = await fetch(`${API_URL}/api/reports`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          batchId: batchId.trim(),
+          reason,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
       Alert.alert(
         t('report.submitted'),
         t('report.dawaPointsInfo'),

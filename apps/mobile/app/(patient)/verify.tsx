@@ -1,48 +1,52 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
-import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { useState, useCallback } from 'react';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SuiClient } from '@mysten/sui/client';
+import QRScanner from '../../src/components/QRScanner';
+import BatchVerifyCard from '../../src/components/BatchVerifyCard';
 
 const SUI_RPC = process.env['EXPO_PUBLIC_SUI_RPC_URL'] ?? 'https://fullnode.devnet.sui.io:443';
+const SUI_PACKAGE_ID = process.env['EXPO_PUBLIC_SUI_PACKAGE_ID'] ?? '';
 const suiClient = new SuiClient({ url: SUI_RPC });
+
+interface CustodyRecord {
+  from: string;
+  to: string;
+  timestamp: number;
+  sequence: number;
+}
 
 interface VerifyResult {
   batchId: string;
-  recalled: boolean;
   drugName: string;
-  expiryDate: string;
   manufacturer: string;
+  composition: string;
+  expiryDate: string;
+  quantity: number;
+  recalled: boolean;
+  custodyChain: CustodyRecord[];
 }
 
 export default function VerifyScreen() {
   const { t } = useTranslation();
-  const [permission, requestPermission] = useCameraPermissions();
-  const [scanned, setScanned] = useState(false);
   const [result, setResult] = useState<VerifyResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [scannerActive, setScannerActive] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  if (!permission?.granted) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.text}>{t('scan.cameraPermission')}</Text>
-        <TouchableOpacity style={styles.btn} onPress={requestPermission}>
-          <Text style={styles.btnText}>{t('scan.grantPermission')}</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  const handleScanned = useCallback(async (rawData: string) => {
+    if (loading) return;
 
-  const handleBarCodeScanned = async ({ data }: { data: string }) => {
-    if (scanned || loading) return;
-    setScanned(true);
+    setScannerActive(false);
     setLoading(true);
+    setErrorMsg(null);
 
-    const parts = data.split(':');
+    // Parse QR: dawaTrace:<fabricBatchId>:<suiObjectId>
+    const parts = rawData.split(':');
     if (parts[0] !== 'dawaTrace' || parts.length < 3) {
       Alert.alert(t('error'), t('scan.invalidQR'), [
-        { text: t('ok'), onPress: () => { setScanned(false); setLoading(false); } },
+        { text: t('ok'), onPress: () => { setLoading(false); setScannerActive(true); } },
       ]);
       return;
     }
@@ -50,111 +54,166 @@ export default function VerifyScreen() {
     const suiObjectId = parts[2]!;
 
     try {
-      // Read directly from Sui (public RPC — no API gateway needed)
+      // Read batch object directly from Sui (public RPC, no auth needed)
       const object = await suiClient.getObject({
         id: suiObjectId,
         options: { showContent: true },
       });
 
       if (!object.data?.content || object.data.content.dataType !== 'moveObject') {
-        throw new Error('Not found');
+        throw new Error('Object not found');
       }
 
       const fields = object.data.content.fields as Record<string, unknown>;
+
+      // Query CustodyTransferred events for this batch
+      const custodyChain = await fetchCustodyChain(fields['batch_id'] as string);
+
       setResult({
         batchId: fields['batch_id'] as string,
-        recalled: fields['recalled'] as boolean,
         drugName: fields['drug_name'] as string,
-        expiryDate: fields['expiry_date'] as string,
         manufacturer: fields['manufacturer'] as string,
+        composition: fields['composition'] as string,
+        expiryDate: fields['expiry_date'] as string,
+        quantity: Number(fields['quantity']),
+        recalled: fields['recalled'] as boolean,
+        custodyChain,
       });
     } catch {
       Alert.alert(t('error'), t('verify.failed'), [
-        { text: t('ok'), onPress: () => { setScanned(false); setLoading(false); } },
+        { text: t('ok'), onPress: () => { setScannerActive(true); } },
       ]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [loading, t]);
 
+  const handleScanAnother = useCallback(() => {
+    setResult(null);
+    setErrorMsg(null);
+    setScannerActive(true);
+  }, []);
+
+  const handleReport = useCallback((batchId: string) => {
+    router.push({ pathname: '/(patient)/report', params: { batchId } });
+  }, []);
+
+  // Show result card
   if (result) {
-    const isValid = !result.recalled;
     return (
-      <ScrollView style={styles.resultContainer}>
-        <View style={[styles.resultCard, isValid ? styles.resultValid : styles.resultRecalled]}>
-          <Text style={styles.resultIcon}>{isValid ? '✅' : '🚨'}</Text>
-          <Text style={styles.resultStatus}>
-            {isValid ? t('verify.authentic') : t('verify.recalled')}
-          </Text>
-        </View>
-
-        <View style={styles.detailsCard}>
-          {[
-            ['Drug Name', result.drugName],
-            ['Batch ID', result.batchId],
-            ['Expiry', result.expiryDate],
-            ['Manufacturer', result.manufacturer],
-          ].map(([label, value]) => (
-            <View key={label} style={styles.detailRow}>
-              <Text style={styles.detailLabel}>{label}</Text>
-              <Text style={styles.detailValue}>{value}</Text>
-            </View>
-          ))}
-        </View>
-
-        <TouchableOpacity
-          style={[styles.btn, styles.btnSecondary]}
-          onPress={() => { setResult(null); setScanned(false); }}
-        >
-          <Text style={[styles.btnText, { color: '#16a34a' }]}>{t('verify.scanAnother')}</Text>
-        </TouchableOpacity>
-
-        {!isValid && (
-          <TouchableOpacity
-            style={[styles.btn, styles.btnDanger]}
-            onPress={() => router.push('/(patient)/report')}
-          >
-            <Text style={styles.btnText}>{t('verify.report')}</Text>
-          </TouchableOpacity>
-        )}
+      <ScrollView
+        style={styles.resultContainer}
+        contentContainerStyle={styles.resultContent}
+      >
+        <BatchVerifyCard
+          result={{
+            batchId: result.batchId,
+            drugName: result.drugName,
+            manufacturerId: result.manufacturer,
+            expiryDate: result.expiryDate,
+            quantity: result.quantity,
+            recalled: result.recalled,
+            custodyChain: result.custodyChain,
+          }}
+          onScanAnother={handleScanAnother}
+          onReport={handleReport}
+        />
       </ScrollView>
     );
   }
 
+  // Show scanner with loading overlay
   return (
     <View style={styles.container}>
-      <CameraView
-        style={StyleSheet.absoluteFillObject}
-        facing="back"
-        barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-        onBarcodeScanned={handleBarCodeScanned}
-      />
-      <View style={styles.overlay}>
-        <View style={styles.scanFrame} />
-        <Text style={styles.hint}>{loading ? t('loading') : t('verify.scanHint')}</Text>
-      </View>
+      <QRScanner onScanned={handleScanned} active={scannerActive} />
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#fff" />
+          <Text style={styles.loadingText}>{t('loading')}</Text>
+        </View>
+      )}
+      {errorMsg && (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorText}>{errorMsg}</Text>
+        </View>
+      )}
     </View>
   );
 }
 
+/**
+ * Fetch custody chain by querying CustodyTransferred events from Sui.
+ * Returns the transfers sorted by sequence number.
+ */
+async function fetchCustodyChain(batchId: string): Promise<CustodyRecord[]> {
+  if (!SUI_PACKAGE_ID) return [];
+
+  try {
+    const events = await suiClient.queryEvents({
+      query: {
+        MoveEventType: `${SUI_PACKAGE_ID}::custody::CustodyTransferred`,
+      },
+      limit: 50,
+    });
+
+    return events.data
+      .filter((e) => {
+        const f = e.parsedJson as Record<string, unknown>;
+        return f['batch_id'] === batchId;
+      })
+      .map((e) => {
+        const f = e.parsedJson as Record<string, unknown>;
+        return {
+          from: f['from_node'] as string,
+          to: f['to_node'] as string,
+          sequence: Number(f['sequence']),
+          timestamp: Number(e.timestampMs ?? 0),
+        };
+      })
+      .sort((a, b) => a.sequence - b.sequence);
+  } catch {
+    // Non-critical: return empty chain if events can't be fetched
+    return [];
+  }
+}
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' },
-  text: { color: '#fff', fontSize: 16, textAlign: 'center', padding: 24 },
-  btn: { margin: 16, padding: 16, borderRadius: 12, alignItems: 'center' },
-  btnText: { color: '#fff', fontWeight: '600', fontSize: 15 },
-  btnSecondary: { borderWidth: 1, borderColor: '#16a34a', backgroundColor: 'transparent' },
-  btnDanger: { backgroundColor: '#dc2626' },
-  overlay: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
-  scanFrame: { width: 220, height: 220, borderWidth: 2, borderColor: '#22c55e', borderRadius: 12 },
-  hint: { color: '#fff', fontSize: 13, marginTop: 16, backgroundColor: 'rgba(0,0,0,0.5)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
-  resultContainer: { flex: 1, backgroundColor: '#f9fafb' },
-  resultCard: { margin: 16, padding: 24, borderRadius: 16, alignItems: 'center' },
-  resultValid: { backgroundColor: '#d1fae5' },
-  resultRecalled: { backgroundColor: '#fee2e2' },
-  resultIcon: { fontSize: 48, marginBottom: 8 },
-  resultStatus: { fontSize: 20, fontWeight: '700', color: '#111827' },
-  detailsCard: { marginHorizontal: 16, backgroundColor: '#fff', borderRadius: 12, padding: 16 },
-  detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' },
-  detailLabel: { fontSize: 13, color: '#6b7280' },
-  detailValue: { fontSize: 13, fontWeight: '500', color: '#111827', flex: 1, textAlign: 'right', marginLeft: 12 },
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  resultContainer: {
+    flex: 1,
+    backgroundColor: '#f9fafb',
+  },
+  resultContent: {
+    paddingBottom: 32,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    color: '#fff',
+    fontSize: 14,
+    marginTop: 12,
+  },
+  errorBanner: {
+    position: 'absolute',
+    bottom: 40,
+    left: 16,
+    right: 16,
+    backgroundColor: '#dc2626',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  errorText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '500',
+  },
 });

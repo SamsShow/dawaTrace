@@ -56,7 +56,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "bridge_recall_sla_seconds",
+          "expr": "histogram_quantile(0.95, rate(dawatrace_bridge_recall_sla_seconds_bucket[5m]))",
           "legendFormat": "SLA",
           "refId": "A"
         }
@@ -88,13 +88,13 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "bridge_queue_depth{priority=\"urgent\"}",
+          "expr": "dawatrace_bridge_queue_depth{priority=\"URGENT\"}",
           "legendFormat": "urgent",
           "refId": "A"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "bridge_queue_depth{priority=\"normal\"}",
+          "expr": "dawatrace_bridge_queue_depth{priority=\"NORMAL\"}",
           "legendFormat": "normal",
           "refId": "B"
         }
@@ -156,7 +156,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "bridge_dead_letter_total",
+          "expr": "sum(dawatrace_bridge_dead_letters_total)",
           "legendFormat": "dead letters",
           "refId": "A"
         }
@@ -178,7 +178,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "rate(http_requests_total{job=\"api\"}[1m])",
+          "expr": "sum by (method, route) (rate(dawatrace_api_http_requests_total{job=\"api\"}[1m]))",
           "legendFormat": "{{method}} {{route}}",
           "refId": "A"
         }
@@ -211,13 +211,13 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"api\"}[5m]))",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(dawatrace_api_http_request_duration_seconds_bucket{job=\"api\"}[5m])))",
           "legendFormat": "p95",
           "refId": "A"
         },
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"api\"}[5m]))",
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(dawatrace_api_http_request_duration_seconds_bucket{job=\"api\"}[5m])))",
           "legendFormat": "p50",
           "refId": "B"
         }
@@ -239,7 +239,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "rate(bridge_events_processed_total[5m])",
+          "expr": "sum by (event_type) (rate(dawatrace_bridge_events_processed_total[5m]))",
           "legendFormat": "{{event_type}}",
           "refId": "A"
         }
@@ -261,7 +261,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "rate(bridge_sui_tx_total[5m])",
+          "expr": "sum by (status) (rate(dawatrace_bridge_sui_tx_total[5m]))",
           "legendFormat": "{{status}}",
           "refId": "A"
         }
@@ -277,5 +277,5 @@
   "timezone": "Asia/Kolkata",
   "title": "DawaTrace Overview",
   "uid": "dawatrace-overview",
-  "version": 1
+  "version": 2
 }

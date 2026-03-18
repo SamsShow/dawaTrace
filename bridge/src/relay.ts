@@ -13,6 +13,14 @@ import {
   buildRecordTransferTx,
 } from './sui/transactions.js';
 import { createBridgeKeypair, createSuiClient } from './sui/signer.js';
+import {
+  eventProcessingDuration,
+  recallSLADuration,
+  eventsProcessed,
+  deadLetterCount,
+  suiTxTotal,
+  suiTxDuration,
+} from './metrics.js';
 
 // In-memory map: Fabric batchId → Sui Object ID
 // In production this should be persisted (Redis or DB)
@@ -113,7 +121,9 @@ export class BridgeRelay {
 
       try {
         await this.processEvent(event);
+        eventsProcessed.inc({ event_type: event.eventType, result: 'success' });
       } catch (err) {
+        eventsProcessed.inc({ event_type: event.eventType, result: 'error' });
         logger.error({ err, eventId: event.id, eventType: event.eventType }, 'Failed to process event');
         await this.queue.requeueWithBackoff(event, err as Error);
       }
@@ -138,6 +148,16 @@ export class BridgeRelay {
     }
 
     const elapsedMs = Date.now() - startMs;
+    const elapsedSeconds = elapsedMs / 1000;
+
+    // Record event processing duration
+    eventProcessingDuration.observe({ event_type: event.eventType }, elapsedSeconds);
+
+    // Record recall SLA metric separately for SLA tracking
+    if (event.eventType === 'RecallEvent') {
+      recallSLADuration.observe(elapsedSeconds);
+    }
+
     logger.info({ eventId: event.id, eventType: event.eventType, elapsedMs }, 'Event processed');
 
     if (event.eventType === 'RecallEvent' && elapsedMs > 30_000) {
@@ -229,14 +249,24 @@ export class BridgeRelay {
     const bytes = await tx.build({ client: this.suiClient });
     const { signature } = await this.keypair.signTransaction(bytes);
 
-    return this.suiClient.executeTransactionBlock({
-      transactionBlock: bytes,
-      signature,
-      options: {
-        showEffects: true,
-        showObjectChanges: true,
-      },
-    });
+    const endTimer = suiTxDuration.startTimer();
+    try {
+      const result = await this.suiClient.executeTransactionBlock({
+        transactionBlock: bytes,
+        signature,
+        options: {
+          showEffects: true,
+          showObjectChanges: true,
+        },
+      });
+      suiTxTotal.inc({ status: 'success' });
+      endTimer();
+      return result;
+    } catch (err) {
+      suiTxTotal.inc({ status: 'failure' });
+      endTimer();
+      throw err;
+    }
   }
 }
 

@@ -1,4 +1,28 @@
+import { Download } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
+import { Button } from '../components/ui/button';
+import { useAuth } from '../hooks/useAuth';
+import { getToken } from '../lib/auth';
+
+async function downloadExport(path: string) {
+  const token = getToken();
+  const res = await fetch(path, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) throw new Error('Export failed');
+  const blob = await res.blob();
+  const disposition = res.headers.get('Content-Disposition') || '';
+  const match = disposition.match(/filename="?([^"]+)"?/);
+  const filename = match?.[1] || 'export';
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
 
 // Placeholder data — wire to Fabric via GraphQL in production
 const MOCK_RECALLS = [
@@ -7,12 +31,27 @@ const MOCK_RECALLS = [
 ];
 
 export default function Recalls() {
+  const { user } = useAuth();
+  const isRegulator = user?.orgRole === 'REGULATOR';
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
       <main className="flex-1 overflow-auto">
-        <div className="px-6 py-4 border-b border-border">
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between">
           <h1 className="text-sm font-semibold">Recalls</h1>
+          {isRegulator && (
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={() => downloadExport('/api/exports/recalls?format=csv')}>
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                Export CSV
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => downloadExport('/api/exports/recalls?format=json')}>
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                Export JSON
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="px-6 py-6">

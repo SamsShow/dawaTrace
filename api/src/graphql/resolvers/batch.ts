@@ -1,5 +1,7 @@
 import * as fabricClient from '../../fabric/client.js';
 import { AuthenticatedUser } from '../../rest/middleware/auth.js';
+import { detectAnomalies } from '../../anomaly/detector.js';
+import { pubsub, EVENTS } from '../pubsub.js';
 
 export const batchResolvers = {
   Query: {
@@ -12,8 +14,9 @@ export const batchResolvers = {
     recall: async (_: unknown, args: { batchId: string }) => {
       return fabricClient.getRecall(args.batchId);
     },
-    anomalies: async () => {
-      return [];
+    anomalies: async (_: unknown, args: { limit?: number }) => {
+      const batches = await fabricClient.listBatches();
+      return detectAnomalies(batches, args.limit);
     },
   },
   Mutation: {
@@ -38,6 +41,9 @@ export const batchResolvers = {
         quantity: args.quantity,
         details: args.details ? JSON.parse(args.details) : {},
       });
+      pubsub.publish(EVENTS.BATCH_EVENT, {
+        batchEvent: { eventType: 'MINT', batchId: args.batchId, timestamp: Date.now() },
+      });
       return { success: true, message: `Batch ${args.batchId} minted` };
     },
 
@@ -53,6 +59,9 @@ export const batchResolvers = {
         quantity: args.quantity,
         gpsLocation: args.gpsLocation ?? '',
       });
+      pubsub.publish(EVENTS.BATCH_EVENT, {
+        batchEvent: { eventType: 'TRANSFER', batchId: args.batchId, timestamp: Date.now() },
+      });
       return { success: true, message: 'Transfer recorded' };
     },
 
@@ -63,6 +72,11 @@ export const batchResolvers = {
     ) => {
       await fabricClient.flagChemist({ chemistId: args.chemistId, batchId: args.batchId });
       return { success: true, message: 'Chemist flagged' };
+    },
+  },
+  Subscription: {
+    batchEvent: {
+      subscribe: () => pubsub.asyncIterableIterator([EVENTS.BATCH_EVENT]),
     },
   },
 };

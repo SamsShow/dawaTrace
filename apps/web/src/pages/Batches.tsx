@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, gql } from '@apollo/client';
 import { format } from 'date-fns';
-import { PackagePlus, ArrowRight } from 'lucide-react';
+import { PackagePlus, ArrowRight, Download } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
@@ -10,6 +10,8 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Dialog } from '../components/ui/dialog';
 import { FileUpload } from '../components/ui/file-upload';
+import { useAuth } from '../hooks/useAuth';
+import { getToken } from '../lib/auth';
 import type { Batch, BatchStatus } from '../lib/types';
 
 const LIST_BATCHES = gql`
@@ -75,7 +77,30 @@ type UploadedFiles = {
 
 const EMPTY_FILES: UploadedFiles = { productImage: [], gmpCert: [], labReport: [] };
 
+async function downloadExport(path: string) {
+  const token = getToken();
+  const res = await fetch(path, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) throw new Error('Export failed');
+  const blob = await res.blob();
+  const disposition = res.headers.get('Content-Disposition') || '';
+  const match = disposition.match(/filename="?([^"]+)"?/);
+  const filename = match?.[1] || 'export';
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 export default function Batches() {
+  const { user } = useAuth();
+  const isRegulator = user?.orgRole === 'REGULATOR';
+
   const { data, loading, refetch } = useQuery<{ batches: Batch[] }>(LIST_BATCHES, {
     pollInterval: 15_000,
   });
@@ -129,10 +154,24 @@ export default function Batches() {
         {/* Header */}
         <div className="px-6 py-4 border-b border-border flex items-center justify-between">
           <h1 className="text-sm font-semibold">Batches</h1>
-          <Button size="sm" onClick={() => { setOpen(true); setMintSuccess(''); setMintError(''); }}>
-            <PackagePlus className="h-3.5 w-3.5 mr-1.5" />
-            Mint batch
-          </Button>
+          <div className="flex items-center gap-2">
+            {isRegulator && (
+              <>
+                <Button size="sm" variant="outline" onClick={() => downloadExport('/api/exports/batches?format=csv')}>
+                  <Download className="h-3.5 w-3.5 mr-1.5" />
+                  Export CSV
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => downloadExport('/api/exports/batches?format=json')}>
+                  <Download className="h-3.5 w-3.5 mr-1.5" />
+                  Export JSON
+                </Button>
+              </>
+            )}
+            <Button size="sm" onClick={() => { setOpen(true); setMintSuccess(''); setMintError(''); }}>
+              <PackagePlus className="h-3.5 w-3.5 mr-1.5" />
+              Mint batch
+            </Button>
+          </div>
         </div>
 
         {/* Batch table */}

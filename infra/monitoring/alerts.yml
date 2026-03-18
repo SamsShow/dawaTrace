@@ -1,0 +1,105 @@
+groups:
+  - name: dawatrace
+    rules:
+      # ── Recall SLA ──────────────────────────────────────────────────
+      - alert: RecallSLABreach
+        expr: >
+          (
+            dawatrace_bridge_recall_sla_seconds_bucket{le="60"}
+            / ignoring(le) dawatrace_bridge_recall_sla_seconds_count
+          ) < 0.95
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Recall SLA breach — >5% of recalls exceeding 60s target"
+          description: >
+            Less than 95% of recall anchor operations complete within the 60-second
+            SLA window. Investigate bridge queue backlog and Sui RPC latency.
+
+      # ── Bridge dead letters ─────────────────────────────────────────
+      - alert: BridgeDeadLetterHigh
+        expr: rate(dawatrace_bridge_dead_letters_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Bridge is producing dead-letter events"
+          description: >
+            One or more Fabric events failed all retry attempts and were
+            dead-lettered. Check bridge logs and Sui RPC connectivity.
+
+      # ── Queue backlog ───────────────────────────────────────────────
+      - alert: BridgeQueueBacklog
+        expr: dawatrace_bridge_queue_depth{priority="URGENT"} > 5
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "URGENT queue backlog — recall events are piling up"
+          description: >
+            The URGENT priority queue has more than 5 pending events.
+            Recall anchoring may breach the 60-second SLA.
+
+      - alert: BridgeNormalQueueBacklog
+        expr: dawatrace_bridge_queue_depth{priority="NORMAL"} > 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "NORMAL queue backlog — mint/transfer anchoring falling behind"
+          description: >
+            The NORMAL priority queue has more than 50 pending events.
+
+      # ── API latency ────────────────────────────────────────────────
+      - alert: APIHighLatency
+        expr: >
+          histogram_quantile(0.95,
+            rate(dawatrace_api_http_request_duration_seconds_bucket[5m])
+          ) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API p95 latency exceeds 5 seconds"
+          description: >
+            The 95th percentile HTTP request latency is above 5 seconds.
+            Check Fabric gateway and database connectivity.
+
+      # ── API error rate ──────────────────────────────────────────────
+      - alert: APIHighErrorRate
+        expr: >
+          (
+            sum(rate(dawatrace_api_http_requests_total{status=~"5.."}[5m]))
+            / sum(rate(dawatrace_api_http_requests_total[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API error rate exceeds 5%"
+          description: >
+            More than 5% of API requests are returning 5xx status codes.
+
+      # ── Bridge service down ─────────────────────────────────────────
+      - alert: BridgeDown
+        expr: up{job="bridge"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Bridge relay service is down"
+          description: >
+            Prometheus cannot scrape the bridge health endpoint.
+            Fabric events are not being anchored to Sui.
+
+      # ── API service down ────────────────────────────────────────────
+      - alert: APIDown
+        expr: up{job="api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API gateway is down"
+          description: >
+            Prometheus cannot scrape the API metrics endpoint.
