@@ -1,0 +1,16 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/auth/login/route": "app/api/auth/login/route.js",
+  "/api/health/route": "app/api/health/route.js",
+  "/api/graphql/route": "app/api/graphql/route.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js",
+  "/docs/page": "app/docs/page.js",
+  "/(dashboard)/batches/page": "app/(dashboard)/batches/page.js",
+  "/(dashboard)/dashboard/page": "app/(dashboard)/dashboard/page.js",
+  "/(dashboard)/batches/[batchId]/page": "app/(dashboard)/batches/[batchId]/page.js",
+  "/(dashboard)/admin/page": "app/(dashboard)/admin/page.js",
+  "/(dashboard)/recalls/page": "app/(dashboard)/recalls/page.js",
+  "/(dashboard)/analytics/page": "app/(dashboard)/analytics/page.js",
+  "/(dashboard)/reports/page": "app/(dashboard)/reports/page.js"
+}

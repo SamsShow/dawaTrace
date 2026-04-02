@@ -7,26 +7,6 @@ on:
     branches: [main]
 
 jobs:
-  # ── Go chaincode tests ────────────────────────────────────────────────────
-  chaincode:
-    name: Fabric chaincode (Go)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: fabric/chaincode/dawaTrace
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.22"
-          cache-dependency-path: fabric/chaincode/dawaTrace/go.sum
-      - name: Install dependencies
-        run: go mod download
-      - name: Vet
-        run: go vet ./...
-      - name: Test
-        run: go test -v ./...
-
   # ── Sui Move tests ────────────────────────────────────────────────────────
   sui-contracts:
     name: Sui Move contracts
@@ -58,82 +38,24 @@ jobs:
         working-directory: sui
         run: sui move test
 
-  # ── TypeScript (API + bridge) ─────────────────────────────────────────────
-  typescript:
-    name: TypeScript (API + bridge)
+  # ── Next.js ──────────────────────────────────────────────────────────────
+  nextjs:
+    name: Next.js (build + lint)
     runs-on: ubuntu-latest
-    services:
-      redis:
-        image: redis:7
-        ports: ["6379:6379"]
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 5s
-          --health-timeout 3s
-          --health-retries 5
     env:
       NODE_ENV: test
-      MOCK_FABRIC: "true"
-      REDIS_URL: redis://localhost:6379
       API_JWT_SECRET: ci-test-secret-do-not-use-in-prod
       SUI_RPC_URL: https://fullnode.devnet.sui.io:443
-      BRIDGE_SUI_PRIVATE_KEY: "0x0000000000000000000000000000000000000000000000000000000000000001"
-      BRIDGE_CAPABILITY_ID: "0x0000000000000000000000000000000000000000000000000000000000000000"
-      BRIDGE_PACKAGE_ID: "0x0000000000000000000000000000000000000000000000000000000000000000"
+      SUI_PACKAGE_ID: "0x0000000000000000000000000000000000000000000000000000000000000000"
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: pnpm
+          cache: npm
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Type-check API
-        run: pnpm --filter @dawaTrace/api exec tsc --noEmit
-      - name: Type-check bridge
-        run: pnpm --filter @dawaTrace/bridge exec tsc --noEmit
-      - name: Test API
-        run: pnpm --filter @dawaTrace/api test
-      - name: Test bridge
-        run: pnpm --filter @dawaTrace/bridge test
-        env:
-          MOCK_FABRIC: "true"
-          REDIS_URL: redis://localhost:6379
-
-  # ── Web dashboard ─────────────────────────────────────────────────────────
-  web:
-    name: Web dashboard (Vite + React)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: pnpm
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Type-check
-        run: pnpm --filter @dawaTrace/web exec tsc --noEmit
-      - name: Build
-        run: pnpm --filter @dawaTrace/web build
+        run: npm ci
       - name: Lint
-        run: pnpm --filter @dawaTrace/web lint
-
-  # ── Docker Compose smoke test ─────────────────────────────────────────────
-  docker-smoke:
-    name: Docker Compose (smoke)
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v4
-      - name: Copy env
-        run: cp .env.example .env
-      - name: Start services
-        run: cd infra && docker compose -f docker-compose.yml up -d
-      - name: Wait for API health
-        run: sleep 10 && curl -f http://localhost:3000/health/health || exit 1
-      - name: Tear down
-        if: always()
-        run: cd infra && docker compose down
+        run: npm run lint
+      - name: Build
+        run: npm run build

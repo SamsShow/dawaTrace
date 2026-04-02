@@ -17,14 +17,14 @@ module dawa_trace::export_passport {
     /// Bridgeable via LayerZero to 140+ chains for importing country verification.
     public struct ExportPassport has key, store {
         id: UID,
-        /// Matches the Fabric batchId
+        /// Batch identifier
         batch_id: String,
         /// Destination country / importing authority
         destination: String,
         /// Target chain for LayerZero bridge (e.g., "ethereum", "polygon")
         destination_chain: String,
-        /// SHA-256 of Fabric batch state at shipment time
-        fabric_data_hash: vector<u8>,
+        /// SHA-256 of batch data at shipment time
+        data_hash: vector<u8>,
         /// WHO-GMP certificate reference
         gmp_cert_ref: String,
         /// Quantity shipped for export
@@ -57,12 +57,11 @@ module dawa_trace::export_passport {
 
     /// Mints an ExportPassport NFT at point of shipment.
     /// Passport is transferred to the manufacturer/exporter's address.
-    /// Importing country health authority scans QR → verifies on their chain via LayerZero.
     public fun mint_export_passport(
         batch_id: String,
         destination: String,
         destination_chain: String,
-        fabric_data_hash: vector<u8>,
+        data_hash: vector<u8>,
         gmp_cert_ref: String,
         export_quantity: u64,
         shipment_date: String,
@@ -85,7 +84,7 @@ module dawa_trace::export_passport {
             batch_id,
             destination,
             destination_chain,
-            fabric_data_hash,
+            data_hash,
             gmp_cert_ref,
             export_quantity,
             shipment_date,
@@ -115,6 +114,6 @@ module dawa_trace::export_passport {
     public fun batch_id(passport: &ExportPassport): String { passport.batch_id }
     public fun destination(passport: &ExportPassport): String { passport.destination }
     public fun is_invalidated(passport: &ExportPassport): bool { passport.invalidated }
-    public fun fabric_data_hash(passport: &ExportPassport): vector<u8> { passport.fabric_data_hash }
+    public fun data_hash(passport: &ExportPassport): vector<u8> { passport.data_hash }
     public fun gmp_cert_ref(passport: &ExportPassport): String { passport.gmp_cert_ref }
 }

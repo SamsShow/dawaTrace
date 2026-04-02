@@ -1,5 +1,5 @@
 /// Custody tracking — records the public chain of custody for each batch.
-/// Each supply chain handoff (Distributor → C&F → Stockist → Chemist)
+/// Each supply chain handoff (Distributor -> C&F -> Stockist -> Chemist)
 /// is recorded as a CustodyRecord on Sui, creating a public, auditable trail.
 module dawa_trace::custody {
     use sui::object::{Self, UID, ID};
@@ -14,19 +14,18 @@ module dawa_trace::custody {
     // =====================================================================
 
     /// An immutable record of a single custody transfer.
-    /// Created by bridge relay on each Fabric TransferEvent.
     public struct CustodyRecord has key {
         id: UID,
-        /// Matches the Fabric batchId
+        /// Batch identifier
         batch_id: String,
-        /// Fabric node ID of sender
+        /// Node ID of sender
         from_node: String,
-        /// Fabric node ID of receiver
+        /// Node ID of receiver
         to_node: String,
         /// Quantity transferred
         quantity: u64,
-        /// SHA-256 of Fabric batch state after this transfer
-        fabric_data_hash: vector<u8>,
+        /// SHA-256 of batch state after this transfer
+        data_hash: vector<u8>,
         /// Sequence number (transfer #1, #2, etc.)
         sequence: u64,
         /// Unix epoch when this record was created
@@ -49,14 +48,13 @@ module dawa_trace::custody {
     // Functions
     // =====================================================================
 
-    /// Called by bridge relay on each Fabric TransferEvent.
-    /// Creates an immutable CustodyRecord and freezes it (public read access).
+    /// Records a custody transfer. Creates an immutable CustodyRecord and freezes it.
     public fun record_transfer(
         batch_id: String,
         from_node: String,
         to_node: String,
         quantity: u64,
-        fabric_data_hash: vector<u8>,
+        data_hash: vector<u8>,
         sequence: u64,
         _cap: &BridgeCapability,
         ctx: &mut TxContext,
@@ -65,7 +63,7 @@ module dawa_trace::custody {
         let record_id = object::uid_to_inner(&id);
 
         event::emit(CustodyTransferred {
-            batch_id: from_node, // emit batch_id not from_node; fix below
+            batch_id,
             record_id,
             from_node,
             to_node,
@@ -78,7 +76,7 @@ module dawa_trace::custody {
             from_node,
             to_node,
             quantity,
-            fabric_data_hash,
+            data_hash,
             sequence,
             timestamp: tx_context::epoch(ctx),
         };

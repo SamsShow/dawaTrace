@@ -1,0 +1,16 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/api/auth/login/route": "/api/auth/login",
+  "/api/health/route": "/api/health",
+  "/api/graphql/route": "/api/graphql",
+  "/login/page": "/login",
+  "/page": "/",
+  "/docs/page": "/docs",
+  "/(dashboard)/batches/page": "/batches",
+  "/(dashboard)/dashboard/page": "/dashboard",
+  "/(dashboard)/batches/[batchId]/page": "/batches/[batchId]",
+  "/(dashboard)/admin/page": "/admin",
+  "/(dashboard)/recalls/page": "/recalls",
+  "/(dashboard)/analytics/page": "/analytics",
+  "/(dashboard)/reports/page": "/reports"
+}

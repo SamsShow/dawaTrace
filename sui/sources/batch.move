@@ -1,7 +1,6 @@
-/// BatchObject — the public digital twin of a Hyperledger Fabric batch record.
-/// Created by the C-DAC bridge relay when a batch is minted on Fabric.
+/// BatchObject — on-chain record of a pharmaceutical batch.
+/// Created when a manufacturer mints a batch on Sui.
 /// Ownership transfers with each supply chain handoff, creating a public audit trail.
-/// All regulatory truth lives on Fabric; this is the public verification window.
 module dawa_trace::batch {
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
@@ -14,15 +13,14 @@ module dawa_trace::batch {
     // Structs
     // =====================================================================
 
-    /// The public digital twin of a Fabric batch record.
-    /// Immutable fields (drug_name, manufacturer, composition, expiry_date)
-    /// are set at creation and never change.
-    /// Mutable fields (recalled, fabric_data_hash) update as state evolves on Fabric.
+    /// On-chain batch record. Immutable fields (drug_name, manufacturer,
+    /// composition, expiry_date) are set at creation and never change.
+    /// Mutable fields (recalled, data_hash) update as state evolves.
     public struct BatchObject has key, store {
         id: UID,
-        /// Matches the Fabric batchId — primary cross-chain identifier
+        /// Unique batch identifier
         batch_id: String,
-        /// Manufacturer's Fabric node ID / Aadhaar-linked DID
+        /// Manufacturer's node ID
         manufacturer: String,
         /// Human-readable drug name (e.g., "Paracetamol 500mg")
         drug_name: String,
@@ -32,9 +30,9 @@ module dawa_trace::batch {
         expiry_date: String,
         /// Initial quantity manufactured
         quantity: u64,
-        /// SHA-256 of the Fabric batch JSON at mint time — proves Fabric↔Sui parity
-        fabric_data_hash: vector<u8>,
-        /// Set to true by bridge relay when CDSCO issues a recall on Fabric
+        /// SHA-256 of the batch data — integrity proof
+        data_hash: vector<u8>,
+        /// Set to true when CDSCO issues a recall
         recalled: bool,
         /// Unix timestamp (seconds) when this object was created on Sui
         created_at: u64,
@@ -65,7 +63,6 @@ module dawa_trace::batch {
     // Functions
     // =====================================================================
 
-    /// Called by bridge relay when a MintEvent is received from Fabric.
     /// Creates a BatchObject and transfers ownership to the manufacturer's address.
     public fun mint_batch(
         batch_id: String,
@@ -74,7 +71,7 @@ module dawa_trace::batch {
         composition: String,
         expiry_date: String,
         quantity: u64,
-        fabric_data_hash: vector<u8>,
+        data_hash: vector<u8>,
         manufacturer_address: address,
         _cap: &BridgeCapability,
         ctx: &mut TxContext,
@@ -96,7 +93,7 @@ module dawa_trace::batch {
             composition,
             expiry_date,
             quantity,
-            fabric_data_hash,
+            data_hash,
             recalled: false,
             created_at: tx_context::epoch(ctx),
         };
@@ -104,9 +101,7 @@ module dawa_trace::batch {
         transfer::transfer(batch, manufacturer_address);
     }
 
-    /// Called by bridge relay when a RecallEvent is received from Fabric.
-    /// Marks the batch as recalled — patient app QR scan will return red screen.
-    /// This must complete within 60 seconds of the Fabric recall being committed.
+    /// Marks the batch as recalled — patient QR scan will return red screen.
     public fun mark_recalled(
         batch: &mut BatchObject,
         _cap: &BridgeCapability,
@@ -119,14 +114,13 @@ module dawa_trace::batch {
         });
     }
 
-    /// Called by bridge relay on each Fabric state change (transfer, dispense)
-    /// to anchor the updated data hash, maintaining Fabric↔Sui hash parity.
+    /// Anchors an updated data hash after a state change (transfer, dispense).
     public fun anchor_hash(
         batch: &mut BatchObject,
         new_hash: vector<u8>,
         _cap: &BridgeCapability,
     ) {
-        batch.fabric_data_hash = new_hash;
+        batch.data_hash = new_hash;
 
         event::emit(HashAnchored {
             batch_id: string::utf8(*string::bytes(&batch.batch_id)),
@@ -140,12 +134,11 @@ module dawa_trace::batch {
     // =====================================================================
 
     /// Returns the key verification fields for a batch.
-    /// Called millions of times daily by the patient QR scan flow.
     public fun verify_batch(batch: &BatchObject): (String, bool, vector<u8>, String) {
         (
             batch.batch_id,
             batch.recalled,
-            batch.fabric_data_hash,
+            batch.data_hash,
             batch.expiry_date,
         )
     }
@@ -155,5 +148,5 @@ module dawa_trace::batch {
     public fun drug_name(batch: &BatchObject): String { batch.drug_name }
     public fun manufacturer(batch: &BatchObject): String { batch.manufacturer }
     public fun expiry_date(batch: &BatchObject): String { batch.expiry_date }
-    public fun fabric_data_hash(batch: &BatchObject): vector<u8> { batch.fabric_data_hash }
+    public fun data_hash(batch: &BatchObject): vector<u8> { batch.data_hash }
 }

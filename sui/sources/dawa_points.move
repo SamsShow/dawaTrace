@@ -15,7 +15,6 @@ module dawa_trace::dawa_points {
     // Error codes
     // =====================================================================
 
-    const EAlreadyAwarded: u64 = 1;
     const EInsufficientBalance: u64 = 2;
 
     // =====================================================================
@@ -67,10 +66,8 @@ module dawa_trace::dawa_points {
     // Functions
     // =====================================================================
 
-    /// Called by bridge relay when CDSCO confirms a reported batch is fake.
-    /// Creates a DawaPointsLedger if the reporter doesn't have one,
-    /// or increments the existing balance.
-    /// The reporter's address is their Sui zkLogin address (no wallet required).
+    /// Called when CDSCO confirms a reported batch is fake.
+    /// Creates a DawaPointsLedger for the reporter.
     public fun award_points(
         reporter: address,
         batch_id: String,
@@ -96,8 +93,6 @@ module dawa_trace::dawa_points {
             total_redeemed: 0,
         };
 
-        // Transfer to reporter — they own it but cannot transfer it elsewhere
-        // because DawaPointsLedger lacks `store` ability
         transfer::transfer(ledger, reporter);
     }
 
@@ -107,7 +102,7 @@ module dawa_trace::dawa_points {
         batch_id: String,
         amount: u64,
         _cap: &BridgeCapability,
-        ctx: &mut TxContext,
+        _ctx: &mut TxContext,
     ) {
         ledger.balance = ledger.balance + amount;
         ledger.total_earned = ledger.total_earned + amount;
@@ -122,8 +117,6 @@ module dawa_trace::dawa_points {
     }
 
     /// Redeem points at a Jan Aushadhi pharmacy.
-    /// Called by the pharmacy's Sui client when dispensing free generic medicine.
-    /// Requires the reporter to present their DawaPointsLedger object.
     public fun redeem_points(
         ledger: &mut DawaPointsLedger,
         amount: u64,
@@ -142,7 +135,6 @@ module dawa_trace::dawa_points {
             pharmacy_id,
         });
 
-        // Create immutable redemption record for audit trail
         let record = RedemptionRecord {
             id: object::new(ctx),
             owner: ledger.owner,

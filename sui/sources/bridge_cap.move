@@ -1,21 +1,21 @@
-/// BridgeCapability — capability object held by the C-DAC bridge relay.
+/// BridgeCapability — capability object for authorized access control.
 /// All state-mutating calls on Sui (mint, recall, award points) require
-/// this capability. This pattern allows key rotation: C-DAC transfers
+/// this capability. This pattern allows key rotation: admin transfers
 /// the capability to a new address without redeploying contracts.
 module dawa_trace::bridge_cap {
     use sui::object::{Self, UID};
     use sui::tx_context::{Self, TxContext};
     use sui::transfer;
 
-    /// The capability object. Only one exists; held by C-DAC bridge relay.
+    /// The capability object. Only one exists; held by the authorized operator.
     /// Has `key` only — not `store` — so it cannot be wrapped or transferred
     /// by anything other than explicit transfer calls in this module.
     public struct BridgeCapability has key {
         id: UID,
     }
 
-    /// AdminCapability is held by the contract deployer (CDAC admin).
-    /// Used to transfer BridgeCapability to a new relay address.
+    /// AdminCapability is held by the contract deployer (admin).
+    /// Used to transfer BridgeCapability to a new operator address.
     public struct AdminCapability has key {
         id: UID,
     }
@@ -29,14 +29,13 @@ module dawa_trace::bridge_cap {
         transfer::transfer(admin_cap, tx_context::sender(ctx));
     }
 
-    /// Admin can transfer the BridgeCapability to a new relay address.
-    /// Use this when rotating the C-DAC signing key.
+    /// Admin can transfer the BridgeCapability to a new operator address.
     public fun transfer_bridge_cap(
         _admin: &AdminCapability,
         cap: BridgeCapability,
-        new_relay: address,
+        new_operator: address,
     ) {
-        transfer::transfer(cap, new_relay);
+        transfer::transfer(cap, new_operator);
     }
 
     #[test_only]
