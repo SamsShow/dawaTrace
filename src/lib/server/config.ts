@@ -6,6 +6,8 @@ const schema = z.object({
 
   API_JWT_SECRET: z.string().default('dev-secret-change-in-production-min32chars'),
 
+  DATABASE_URL: z.string().url(),
+
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 });
 
