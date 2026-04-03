@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -63,6 +64,10 @@ export default function Login() {
             {loading ? 'Signing in...' : 'Sign in'}
           </Button>
         </form>
+        <p className="text-xs text-muted-foreground text-center mt-4">
+          Don&apos;t have an account?{' '}
+          <Link href="/register" className="text-foreground hover:underline">Register with invite code</Link>
+        </p>
       </div>
     </div>
   );
