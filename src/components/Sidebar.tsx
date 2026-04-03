@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, AlertTriangle, BarChart2, Shield, Flag, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, AlertTriangle, BarChart2, Shield, Flag, Mail, LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { Separator } from './ui/separator';
@@ -15,11 +15,16 @@ export default function Sidebar() {
   const { t } = useTranslation();
   const pathname = usePathname();
 
+  const canInvite = user?.orgRole === 'REGULATOR' || user?.orgRole === 'MANUFACTURER' || user?.orgRole === 'DISTRIBUTOR';
+
   const NAV = [
     { to: '/dashboard', label: t('nav.overview'), icon: LayoutDashboard },
     { to: '/batches', label: t('nav.batches'), icon: Package },
     { to: '/recalls', label: t('nav.recalls'), icon: AlertTriangle },
     { to: '/analytics', label: t('nav.analytics'), icon: BarChart2 },
+    ...(canInvite
+      ? [{ to: '/invitations', label: 'Invitations', icon: Mail }]
+      : []),
     ...(user?.orgRole === 'REGULATOR'
       ? [
           { to: '/reports', label: t('nav.reports', 'Reports'), icon: Flag },
