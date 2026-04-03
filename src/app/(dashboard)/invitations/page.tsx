@@ -7,6 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
 import { useMyInvitations, useCreateInvitation } from '@/hooks/useInvitations';
 
@@ -62,73 +65,88 @@ export default function Invitations() {
   };
 
   return (
-    <>
-      <div className="px-6 py-4 border-b border-border flex items-center gap-2">
-        <Mail className="h-4 w-4 text-muted-foreground" />
-        <h1 className="text-sm font-semibold">Invitations</h1>
+    <div className="p-6 space-y-6">
+      <div className="flex items-center gap-2">
+        <Mail className="h-5 w-5 text-muted-foreground" />
+        <h1 className="text-lg font-semibold">Invitations</h1>
       </div>
 
       {allowedRoles.length > 0 && (
-        <div className="px-6 py-6 border-b border-border">
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Create Invitation</h2>
-          <form onSubmit={handleCreate} className="flex items-end gap-3 max-w-xl">
-            <div className="space-y-1.5">
-              <Label className="text-xs">Role</Label>
-              <select
-                value={targetRole}
-                onChange={(e) => setTargetRole(e.target.value)}
-                className="flex h-9 w-40 border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
-                <option value="">Select role</option>
-                {allowedRoles.map(r => <option key={r} value={r}>{r}</option>)}
-              </select>
-            </div>
-            <div className="space-y-1.5 flex-1">
-              <Label className="text-xs">Org Name (optional)</Label>
-              <Input value={targetOrgName} onChange={(e) => setTargetOrgName(e.target.value)} placeholder="Hint for recipient" className="text-xs" />
-            </div>
-            <Button type="submit" size="sm" className="text-xs" disabled={creating || !targetRole}>
-              {creating ? 'Creating...' : 'Generate Code'}
-            </Button>
-          </form>
-          {error && <p className="text-xs text-destructive mt-2">{error}</p>}
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-semibold">Create Invitation</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleCreate} className="flex items-end gap-3 max-w-xl">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Role</Label>
+                <Select value={targetRole} onValueChange={(v) => setTargetRole(v ?? '')}>
+                  <SelectTrigger className="w-40 text-sm">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allowedRoles.map(r => (
+                      <SelectItem key={r} value={r}>{r}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5 flex-1">
+                <Label className="text-xs">Org Name (optional)</Label>
+                <Input value={targetOrgName} onChange={(e) => setTargetOrgName(e.target.value)} placeholder="Hint for recipient" className="text-xs" />
+              </div>
+              <Button type="submit" size="sm" className="text-xs" disabled={creating || !targetRole}>
+                {creating ? 'Creating...' : 'Generate Code'}
+              </Button>
+            </form>
+            {error && <p className="text-xs text-destructive mt-2">{error}</p>}
+          </CardContent>
+        </Card>
       )}
 
-      <div className="px-6 py-6">
-        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Your Invitations</h2>
-        {loading ? (
-          <p className="text-xs text-muted-foreground py-8 text-center">Loading...</p>
-        ) : invitations.length === 0 ? (
-          <div className="border border-border px-4 py-8 text-center">
-            <p className="text-xs text-muted-foreground">No invitations yet.</p>
-          </div>
-        ) : (
-          <div className="border border-border">
-            <div className="grid grid-cols-[100px_120px_1fr_100px_140px_40px] gap-2 px-4 py-2 border-b border-border bg-muted/30">
-              <span className="text-[11px] font-medium text-muted-foreground uppercase">Code</span>
-              <span className="text-[11px] font-medium text-muted-foreground uppercase">Role</span>
-              <span className="text-[11px] font-medium text-muted-foreground uppercase">Org Hint</span>
-              <span className="text-[11px] font-medium text-muted-foreground uppercase">Status</span>
-              <span className="text-[11px] font-medium text-muted-foreground uppercase">Created</span>
-              <span />
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-semibold">Your Invitations</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {loading ? (
+            <p className="text-xs text-muted-foreground py-8 text-center">Loading...</p>
+          ) : invitations.length === 0 ? (
+            <div className="px-4 py-10 text-center">
+              <Mail className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-40" />
+              <p className="text-sm text-muted-foreground">No invitations yet.</p>
             </div>
-            {invitations.map((inv: { id: number; inviteCode: string; targetRole: string; targetOrgName: string | null; usedBy: string | null; expiresAt: number; createdAt: number }) => {
-              const status = getInviteStatus(inv);
-              return (
-                <div key={inv.id} className="grid grid-cols-[100px_120px_1fr_100px_140px_40px] gap-2 px-4 py-3 border-b border-border last:border-b-0 items-center">
-                  <span className="text-xs font-mono font-semibold tracking-wider">{inv.inviteCode}</span>
-                  <span className="text-xs text-muted-foreground">{inv.targetRole}</span>
-                  <span className="text-xs text-muted-foreground truncate">{inv.targetOrgName || '—'}</span>
-                  <span><Badge variant={status.variant}>{status.label}</Badge></span>
-                  <span className="text-xs text-muted-foreground">{format(new Date(inv.createdAt), 'd MMM yyyy HH:mm')}</span>
-                  <span>{!inv.usedBy && inv.expiresAt > Date.now() && <CopyButton text={inv.inviteCode} />}</span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-[11px] uppercase">Code</TableHead>
+                  <TableHead className="text-[11px] uppercase">Role</TableHead>
+                  <TableHead className="text-[11px] uppercase">Org Hint</TableHead>
+                  <TableHead className="text-[11px] uppercase">Status</TableHead>
+                  <TableHead className="text-[11px] uppercase">Created</TableHead>
+                  <TableHead />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {invitations.map((inv: { id: number; inviteCode: string; targetRole: string; targetOrgName: string | null; usedBy: string | null; expiresAt: number; createdAt: number }) => {
+                  const status = getInviteStatus(inv);
+                  return (
+                    <TableRow key={inv.id}>
+                      <TableCell className="text-xs font-mono font-semibold tracking-wider">{inv.inviteCode}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{inv.targetRole}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground max-w-[160px] truncate">{inv.targetOrgName || '—'}</TableCell>
+                      <TableCell><Badge variant={status.variant}>{status.label}</Badge></TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{format(new Date(inv.createdAt), 'd MMM yyyy HH:mm')}</TableCell>
+                      <TableCell>{!inv.usedBy && inv.expiresAt > Date.now() && <CopyButton text={inv.inviteCode} />}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
