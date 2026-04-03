@@ -28,10 +28,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Account is suspended' }, { status: 403 });
   }
 
-  // Support both bcrypt hashes and legacy plaintext (seeded regulator)
-  const isValid = user.password_hash.startsWith('$2')
-    ? await bcrypt.compare(password, user.password_hash)
-    : password === user.password_hash;
+  const isValid = await bcrypt.compare(password, user.password_hash);
 
   if (!isValid) {
     return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
