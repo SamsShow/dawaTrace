@@ -1,6 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { FileText } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAuth } from '@/hooks/useAuth';
 
 interface Report {
@@ -9,10 +14,10 @@ interface Report {
   resolvedAt: number | null; pointsAwarded: number | null;
 }
 
-const STATUS_BADGE: Record<Report['status'], string> = {
-  PENDING: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
-  CONFIRMED: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
-  REJECTED: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+const STATUS_VARIANT: Record<Report['status'], 'default' | 'success' | 'destructive' | 'warning'> = {
+  PENDING: 'warning',
+  CONFIRMED: 'success',
+  REJECTED: 'destructive',
 };
 
 export default function Reports() {
@@ -51,51 +56,92 @@ export default function Reports() {
   };
 
   return (
-    <>
-      <div className="px-6 py-4 border-b border-border">
-        <h1 className="text-sm font-semibold">Whistleblower Reports</h1>
-        <p className="text-xs text-muted-foreground mt-0.5">Review suspicious batch reports. Confirmed reports trigger DawaPoints rewards.</p>
+    <div className="p-6 space-y-6">
+      <div>
+        <div className="flex items-center gap-2">
+          <FileText className="h-5 w-5 text-muted-foreground" />
+          <h1 className="text-lg font-semibold">Whistleblower Reports</h1>
+        </div>
+        <p className="text-xs text-muted-foreground mt-1">Review suspicious batch reports. Confirmed reports trigger DawaPoints rewards.</p>
       </div>
-      <div className="px-6 py-6">
-        {loading ? (
-          <div className="px-4 py-8 text-center"><p className="text-xs text-muted-foreground">Loading reports...</p></div>
-        ) : (
-          <div className="border border-border">
-            <div className="grid grid-cols-[100px_120px_1fr_1fr_80px_100px_140px] gap-4 px-4 py-2 border-b border-border bg-muted/30">
-              <span className="text-xs font-medium text-muted-foreground">ID</span>
-              <span className="text-xs font-medium text-muted-foreground">Batch ID</span>
-              <span className="text-xs font-medium text-muted-foreground">Reporter</span>
-              <span className="text-xs font-medium text-muted-foreground">Reason</span>
-              <span className="text-xs font-medium text-muted-foreground">Status</span>
-              <span className="text-xs font-medium text-muted-foreground">Date</span>
-              <span className="text-xs font-medium text-muted-foreground">Actions</span>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-semibold">Reports</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="px-4 py-10 text-center">
+              <p className="text-xs text-muted-foreground">Loading reports...</p>
             </div>
-            {reports.length === 0 ? (
-              <div className="px-4 py-8 text-center"><p className="text-xs text-muted-foreground">No reports submitted yet</p></div>
-            ) : reports.map((r, i) => (
-              <div key={r.id} className={`grid grid-cols-[100px_120px_1fr_1fr_80px_100px_140px] gap-4 px-4 py-3 items-center ${i > 0 ? 'border-t border-border' : ''}`}>
-                <p className="text-xs font-mono text-foreground truncate" title={r.id}>{r.id.slice(-8)}</p>
-                <p className="text-xs font-mono text-foreground">{r.batchId}</p>
-                <p className="text-xs font-mono text-muted-foreground truncate" title={r.reporterAddress}>{r.reporterAddress === 'anonymous' ? 'Anonymous' : `${r.reporterAddress.slice(0, 8)}...`}</p>
-                <p className="text-xs text-muted-foreground truncate" title={r.reason}>{r.reason}</p>
-                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full text-center ${STATUS_BADGE[r.status]}`}>{r.status}</span>
-                <p className="text-xs text-muted-foreground">{new Date(r.createdAt).toLocaleDateString()}</p>
-                <div className="flex gap-1.5">
-                  {r.status === 'PENDING' ? (
-                    <>
-                      <button onClick={() => handleResolve(r.id, 'CONFIRMED')} disabled={resolving === r.id} className="text-[11px] px-2.5 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors">Confirm</button>
-                      <button onClick={() => handleResolve(r.id, 'REJECTED')} disabled={resolving === r.id} className="text-[11px] px-2.5 py-1 rounded bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 transition-colors">Reject</button>
-                    </>
-                  ) : (
-                    <span className="text-[11px] text-muted-foreground">{r.status === 'CONFIRMED' && r.pointsAwarded ? `+${r.pointsAwarded} pts` : 'Resolved'}</span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-        <p className="mt-3 text-xs text-muted-foreground">Confirmed reports award DawaPoints to the whistleblower on Sui.</p>
-      </div>
-    </>
+          ) : reports.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 gap-3">
+              <FileText className="h-10 w-10 text-muted-foreground opacity-30" />
+              <p className="text-sm text-muted-foreground">No reports submitted yet.</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-[11px] uppercase">ID</TableHead>
+                  <TableHead className="text-[11px] uppercase">Batch ID</TableHead>
+                  <TableHead className="text-[11px] uppercase">Reporter</TableHead>
+                  <TableHead className="text-[11px] uppercase">Reason</TableHead>
+                  <TableHead className="text-[11px] uppercase">Status</TableHead>
+                  <TableHead className="text-[11px] uppercase">Date</TableHead>
+                  <TableHead className="text-[11px] uppercase">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {reports.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell className="text-xs font-mono text-foreground" title={r.id}>{r.id.slice(-8)}</TableCell>
+                    <TableCell className="text-xs font-mono text-foreground">{r.batchId}</TableCell>
+                    <TableCell className="text-xs font-mono text-muted-foreground max-w-[120px] truncate" title={r.reporterAddress}>
+                      {r.reporterAddress === 'anonymous' ? 'Anonymous' : `${r.reporterAddress.slice(0, 8)}...`}
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground max-w-[180px] truncate" title={r.reason}>{r.reason}</TableCell>
+                    <TableCell>
+                      <Badge variant={STATUS_VARIANT[r.status]}>{r.status}</Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{new Date(r.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      {r.status === 'PENDING' ? (
+                        <div className="flex gap-1.5">
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="h-7 text-[11px] px-2.5 bg-emerald-600 hover:bg-emerald-700"
+                            onClick={() => handleResolve(r.id, 'CONFIRMED')}
+                            disabled={resolving === r.id}
+                          >
+                            Confirm
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="h-7 text-[11px] px-2.5"
+                            onClick={() => handleResolve(r.id, 'REJECTED')}
+                            disabled={resolving === r.id}
+                          >
+                            Reject
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="text-[11px] text-muted-foreground">
+                          {r.status === 'CONFIRMED' && r.pointsAwarded ? `+${r.pointsAwarded} pts` : 'Resolved'}
+                        </span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <p className="text-xs text-muted-foreground">Confirmed reports award DawaPoints to the whistleblower on Sui.</p>
+    </div>
   );
 }

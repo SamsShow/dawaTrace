@@ -1,7 +1,10 @@
 'use client';
 
-import { Download } from 'lucide-react';
+import { AlertTriangle, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAuth } from '@/hooks/useAuth';
 import { getToken } from '@/lib/auth';
 
@@ -30,40 +33,70 @@ export default function Recalls() {
   const isRegulator = user?.orgRole === 'REGULATOR';
 
   return (
-    <>
-      <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-        <h1 className="text-sm font-semibold">Recalls</h1>
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-muted-foreground" />
+          <h1 className="text-lg font-semibold">Recalls</h1>
+        </div>
         {isRegulator && (
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" onClick={() => downloadExport('/api/exports/recalls?format=csv')}><Download className="h-3.5 w-3.5 mr-1.5" />Export CSV</Button>
-            <Button size="sm" variant="outline" onClick={() => downloadExport('/api/exports/recalls?format=json')}><Download className="h-3.5 w-3.5 mr-1.5" />Export JSON</Button>
+            <Button size="sm" variant="outline" onClick={() => downloadExport('/api/exports/recalls?format=csv')}>
+              <Download className="h-3.5 w-3.5 mr-1.5" />Export CSV
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => downloadExport('/api/exports/recalls?format=json')}>
+              <Download className="h-3.5 w-3.5 mr-1.5" />Export JSON
+            </Button>
           </div>
         )}
       </div>
-      <div className="px-6 py-6">
-        <div className="border border-border">
-          <div className="grid grid-cols-[1fr_1fr_auto_auto_auto] gap-4 px-4 py-2 border-b border-border bg-muted/30">
-            <span className="text-xs font-medium text-muted-foreground">Batch</span>
-            <span className="text-xs font-medium text-muted-foreground">Reason</span>
-            <span className="text-xs font-medium text-muted-foreground">Issued by</span>
-            <span className="text-xs font-medium text-muted-foreground">Date</span>
-            <span className="text-xs font-medium text-muted-foreground">Sui</span>
-          </div>
-          {MOCK_RECALLS.map((r, i) => (
-            <div key={r.batchId} className={`grid grid-cols-[1fr_1fr_auto_auto_auto] gap-4 px-4 py-3 items-center ${i > 0 ? 'border-t border-border' : ''}`}>
-              <div className="min-w-0">
-                <p className="text-xs font-mono text-foreground">{r.batchId}</p>
-                <p className="text-xs text-muted-foreground truncate">{r.drug}</p>
-              </div>
-              <p className="text-xs text-muted-foreground truncate">{r.reason}</p>
-              <p className="text-xs font-mono text-muted-foreground">{r.issuedBy}</p>
-              <p className="text-xs text-muted-foreground">{r.issuedAt}</p>
-              <span className={`text-xs ${r.suiAnchored ? 'text-emerald-600' : 'text-amber-600'}`}>{r.suiAnchored ? 'Anchored' : 'Pending'}</span>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-semibold">Active Recalls</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {MOCK_RECALLS.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 gap-3">
+              <AlertTriangle className="h-10 w-10 text-muted-foreground opacity-30" />
+              <p className="text-sm text-muted-foreground">No active recalls.</p>
+              <p className="text-xs text-muted-foreground">Issue recalls from the batch detail page.</p>
             </div>
-          ))}
-        </div>
-        <p className="mt-3 text-xs text-muted-foreground">Issue recalls from the batch detail page. Each recall is anchored to Sui within 60 s.</p>
-      </div>
-    </>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-[11px] uppercase">Batch</TableHead>
+                  <TableHead className="text-[11px] uppercase">Reason</TableHead>
+                  <TableHead className="text-[11px] uppercase">Issued By</TableHead>
+                  <TableHead className="text-[11px] uppercase">Date</TableHead>
+                  <TableHead className="text-[11px] uppercase">Sui Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {MOCK_RECALLS.map((r) => (
+                  <TableRow key={r.batchId}>
+                    <TableCell>
+                      <p className="text-xs font-mono font-medium text-foreground">{r.batchId}</p>
+                      <p className="text-xs text-muted-foreground">{r.drug}</p>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground max-w-[240px] truncate">{r.reason}</TableCell>
+                    <TableCell className="text-xs font-mono text-muted-foreground">{r.issuedBy}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{r.issuedAt}</TableCell>
+                    <TableCell>
+                      <Badge variant={r.suiAnchored ? 'success' : 'default'}>
+                        {r.suiAnchored ? 'Anchored' : 'Pending'}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <p className="text-xs text-muted-foreground">Issue recalls from the batch detail page. Each recall is anchored to Sui within 60 s.</p>
+    </div>
   );
 }
