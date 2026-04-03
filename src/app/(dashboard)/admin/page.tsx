@@ -2,14 +2,23 @@
 
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { Shield, AlertTriangle, Users, Package, Activity } from 'lucide-react';
+import { Shield, AlertTriangle, Users, Package, Activity, CheckCircle2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useAdminOverview, useLiftSuspension, useBulkRecall } from '@/hooks/useAdmin';
 import type { ChemistViolation } from '@/hooks/useAdmin';
@@ -33,10 +42,10 @@ export default function Admin() {
   const suspendedCount = violations.filter((v) => v.suspended).length;
 
   const STATS = [
-    { label: t('admin.stats.activeBatches'), value: activeCount, icon: Package },
-    { label: t('admin.stats.recalledBatches'), value: recalls.length, icon: AlertTriangle },
-    { label: t('admin.stats.suspendedChemists'), value: suspendedCount, icon: Users },
-    { label: t('admin.stats.pendingTx'), value: 0, icon: Activity },
+    { label: t('admin.stats.activeBatches'), value: activeCount, icon: Package, color: 'text-blue-500' },
+    { label: t('admin.stats.recalledBatches'), value: recalls.length, icon: AlertTriangle, color: 'text-amber-500' },
+    { label: t('admin.stats.suspendedChemists'), value: suspendedCount, icon: Users, color: 'text-rose-500' },
+    { label: t('admin.stats.pendingTx'), value: 0, icon: Activity, color: 'text-emerald-500' },
   ];
 
   const handleLiftSuspension = async (chemistId: string) => {
@@ -65,88 +74,230 @@ export default function Admin() {
   const parsedBatchIds = bulkBatchIds.split('\n').map((id) => id.trim()).filter((id) => id.length > 0);
 
   return (
-    <>
-      <div className="px-6 py-4 border-b border-border flex items-center gap-2">
-        <Shield className="h-4 w-4 text-muted-foreground" /><h1 className="text-sm font-semibold">{t('admin.title')}</h1>
+    <div className="flex flex-col gap-6 p-6">
+      {/* Page header */}
+      <div className="flex items-center gap-2.5">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+          <Shield className="h-4 w-4 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-base font-semibold">{t('admin.title')}</h1>
+          <p className="text-xs text-muted-foreground">Manage chemist violations and issue bulk recalls</p>
+        </div>
       </div>
-      <div className="grid grid-cols-4 border-b border-border divide-x divide-border">
+
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {STATS.map((s) => (
-          <div key={s.label} className="px-6 py-4">
-            <div className="flex items-center gap-1.5 mb-1"><s.icon className="h-3 w-3 text-muted-foreground" /><p className="text-xs text-muted-foreground">{s.label}</p></div>
-            <p className="text-xl font-semibold tabular-nums">{loading ? '...' : s.value}</p>
-          </div>
+          <Card key={s.label} className="rounded-xl">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-medium text-muted-foreground">{s.label}</CardTitle>
+                <s.icon className={`h-4 w-4 ${s.color}`} />
+              </div>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <Skeleton className="h-7 w-16" />
+              ) : (
+                <p className="text-2xl font-bold tabular-nums">{s.value}</p>
+              )}
+            </CardContent>
+          </Card>
         ))}
       </div>
+
+      {/* Result message */}
       {resultMessage && (
-        <div className={`mx-6 mt-4 px-4 py-3 text-xs border ${resultMessage.success ? 'border-green-500/40 bg-green-500/5 text-green-700 dark:text-green-400' : 'border-destructive/40 bg-destructive/5 text-destructive'}`}>
-          {resultMessage.text}
-          <button onClick={() => setResultMessage(null)} className="ml-3 underline opacity-70 hover:opacity-100">{t('admin.dismiss')}</button>
+        <div className={`flex items-center gap-3 rounded-lg border px-4 py-3 text-sm ${resultMessage.success ? 'border-emerald-500/30 bg-emerald-500/8 text-emerald-700 dark:text-emerald-400' : 'border-destructive/30 bg-destructive/8 text-destructive'}`}>
+          {resultMessage.success ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <AlertTriangle className="h-4 w-4 shrink-0" />}
+          <span className="flex-1">{resultMessage.text}</span>
+          <button onClick={() => setResultMessage(null)} className="text-xs underline opacity-60 hover:opacity-100 transition-opacity">{t('admin.dismiss')}</button>
         </div>
       )}
-      <div className="px-6 py-6 space-y-8">
-        <section>
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">{t('admin.flaggedChemists')}</h2>
-          {violations.length === 0 ? (
-            <div className="border border-border px-4 py-8 text-center"><p className="text-xs text-muted-foreground">{t('admin.noViolations')}</p></div>
-          ) : (
-            <div className="border border-border">
-              <div className="grid grid-cols-[1fr_100px_120px_140px_1fr_100px] gap-2 px-4 py-2 border-b border-border bg-muted/30">
-                <span className="text-[11px] font-medium text-muted-foreground uppercase">{t('admin.columns.chemistId')}</span>
-                <span className="text-[11px] font-medium text-muted-foreground uppercase">{t('admin.columns.violations')}</span>
-                <span className="text-[11px] font-medium text-muted-foreground uppercase">{t('admin.columns.status')}</span>
-                <span className="text-[11px] font-medium text-muted-foreground uppercase">{t('admin.columns.lastViolation')}</span>
-                <span className="text-[11px] font-medium text-muted-foreground uppercase">{t('admin.columns.batchIds')}</span>
-                <span className="text-[11px] font-medium text-muted-foreground uppercase">{t('admin.columns.action')}</span>
-              </div>
-              {violations.map((v) => (
-                <div key={v.chemistId} className="grid grid-cols-[1fr_100px_120px_140px_1fr_100px] gap-2 px-4 py-3 border-b border-border last:border-b-0 items-center">
-                  <span className="text-xs font-mono truncate">{v.chemistId}</span>
-                  <span><Badge variant={v.violationCount >= 3 ? 'destructive' : 'warning'}>{v.violationCount}</Badge></span>
-                  <span><Badge variant={v.suspended ? 'destructive' : 'success'}>{v.suspended ? t('admin.suspended') : t('admin.active')}</Badge></span>
-                  <span className="text-xs text-muted-foreground">{v.lastViolationAt > 0 ? format(new Date(v.lastViolationAt), 'd MMM yyyy') : '---'}</span>
-                  <span className="text-[11px] text-muted-foreground font-mono truncate">{v.violationBatchIds.join(', ')}</span>
-                  <span>{v.suspended && <Button variant="outline" size="sm" className="text-[11px] h-7" onClick={() => setConfirmChemist(v)}>{t('admin.liftSuspension')}</Button>}</span>
+
+      {/* Flagged chemists table */}
+      <Card className="rounded-xl">
+        <CardHeader className="border-b pb-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-semibold">{t('admin.flaggedChemists')}</CardTitle>
+            {loading && <Skeleton className="h-4 w-24" />}
+            {!loading && violations.length > 0 && (
+              <Badge variant="secondary" className="text-xs">{violations.length} flagged</Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="space-y-3 p-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <Skeleton className="h-4 flex-1" />
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-7 w-24" />
                 </div>
               ))}
             </div>
+          ) : violations.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+              <CheckCircle2 className="h-8 w-8 text-muted-foreground/40" />
+              <p className="text-sm text-muted-foreground">{t('admin.noViolations')}</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="pl-4 text-xs">{t('admin.columns.chemistId')}</TableHead>
+                  <TableHead className="text-xs">{t('admin.columns.violations')}</TableHead>
+                  <TableHead className="text-xs">{t('admin.columns.status')}</TableHead>
+                  <TableHead className="text-xs">{t('admin.columns.lastViolation')}</TableHead>
+                  <TableHead className="text-xs">{t('admin.columns.batchIds')}</TableHead>
+                  <TableHead className="pr-4 text-xs text-right">{t('admin.columns.action')}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {violations.map((v) => (
+                  <TableRow key={v.chemistId} className="group">
+                    <TableCell className="pl-4">
+                      <span className="font-mono text-xs">{v.chemistId}</span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={v.violationCount >= 3 ? 'destructive' : 'warning'}>
+                        {v.violationCount}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={v.suspended ? 'destructive' : 'success'}>
+                        {v.suspended ? t('admin.suspended') : t('admin.active')}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {v.lastViolationAt > 0 ? format(new Date(v.lastViolationAt), 'd MMM yyyy') : '—'}
+                    </TableCell>
+                    <TableCell className="max-w-[200px]">
+                      <span className="block truncate font-mono text-[11px] text-muted-foreground">
+                        {v.violationBatchIds.join(', ')}
+                      </span>
+                    </TableCell>
+                    <TableCell className="pr-4 text-right">
+                      {v.suspended && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-xs opacity-0 transition-opacity group-hover:opacity-100"
+                          onClick={() => setConfirmChemist(v)}
+                        >
+                          {t('admin.liftSuspension')}
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
-        </section>
-        <Separator />
-        <section>
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">{t('admin.bulkRecall')}</h2>
-          <div className="border border-border p-4 space-y-4 max-w-xl">
-            <div><Label className="text-xs">{t('admin.batchIdsLabel')}</Label><Textarea value={bulkBatchIds} onChange={(e) => setBulkBatchIds(e.target.value)} placeholder={t('admin.batchIdsPlaceholder')} rows={4} className="mt-1 font-mono text-xs" /></div>
-            <div><Label className="text-xs">{t('admin.reasonLabel')}</Label><Input value={bulkReason} onChange={(e) => setBulkReason(e.target.value)} placeholder={t('admin.reasonPlaceholder')} className="mt-1 text-xs" /></div>
-            <Button variant="destructive" size="sm" className="text-xs" disabled={parsedBatchIds.length === 0 || !bulkReason.trim() || recallLoading} onClick={() => setShowRecallConfirm(true)}>
-              <AlertTriangle className="h-3 w-3 mr-1.5" />{t('admin.issueRecall')} ({parsedBatchIds.length})
+        </CardContent>
+      </Card>
+
+      {/* Bulk recall form */}
+      <Card className="rounded-xl">
+        <CardHeader className="border-b pb-4">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-destructive" />
+            <CardTitle className="text-sm font-semibold">{t('admin.bulkRecall')}</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <div className="max-w-xl space-y-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">{t('admin.batchIdsLabel')}</Label>
+              <Textarea
+                value={bulkBatchIds}
+                onChange={(e) => setBulkBatchIds(e.target.value)}
+                placeholder={t('admin.batchIdsPlaceholder')}
+                rows={4}
+                className="font-mono text-xs"
+              />
+              {parsedBatchIds.length > 0 && (
+                <p className="text-[11px] text-muted-foreground">{parsedBatchIds.length} batch ID{parsedBatchIds.length !== 1 ? 's' : ''} entered</p>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">{t('admin.reasonLabel')}</Label>
+              <Input
+                value={bulkReason}
+                onChange={(e) => setBulkReason(e.target.value)}
+                placeholder={t('admin.reasonPlaceholder')}
+                className="text-xs"
+              />
+            </div>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="text-xs"
+              disabled={parsedBatchIds.length === 0 || !bulkReason.trim() || recallLoading}
+              onClick={() => setShowRecallConfirm(true)}
+            >
+              <AlertTriangle className="mr-1.5 h-3 w-3" />
+              {t('admin.issueRecall')} ({parsedBatchIds.length})
             </Button>
           </div>
-        </section>
-      </div>
+        </CardContent>
+      </Card>
 
+      {/* Lift suspension dialog */}
       <Dialog open={!!confirmChemist} onOpenChange={(open) => !open && setConfirmChemist(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle>{t('admin.confirmLiftTitle')}</DialogTitle><DialogDescription>{t('admin.confirmLiftDescription', { chemistId: confirmChemist?.chemistId })}</DialogDescription></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>{t('admin.confirmLiftTitle')}</DialogTitle>
+            <DialogDescription>
+              {t('admin.confirmLiftDescription', { chemistId: confirmChemist?.chemistId })}
+            </DialogDescription>
+          </DialogHeader>
           <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" size="sm" onClick={() => setConfirmChemist(null)}>{t('common.cancel')}</Button>
-            <Button size="sm" disabled={liftLoading} onClick={() => confirmChemist && handleLiftSuspension(confirmChemist.chemistId)}>{liftLoading ? t('common.loading') : t('admin.confirmLift')}</Button>
+            <Button variant="outline" size="sm" onClick={() => setConfirmChemist(null)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              size="sm"
+              disabled={liftLoading}
+              onClick={() => confirmChemist && handleLiftSuspension(confirmChemist.chemistId)}
+            >
+              {liftLoading ? t('common.loading') : t('admin.confirmLift')}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
 
+      {/* Bulk recall confirmation dialog */}
       <Dialog open={showRecallConfirm} onOpenChange={setShowRecallConfirm}>
         <DialogContent>
-          <DialogHeader><DialogTitle>{t('admin.confirmRecallTitle')}</DialogTitle><DialogDescription>{t('admin.confirmRecallDescription', { count: parsedBatchIds.length })}</DialogDescription></DialogHeader>
-          <div className="mt-2 border border-border p-3 max-h-32 overflow-auto">
-            {parsedBatchIds.map((id) => <p key={id} className="text-xs font-mono text-muted-foreground">{id}</p>)}
+          <DialogHeader>
+            <DialogTitle>{t('admin.confirmRecallTitle')}</DialogTitle>
+            <DialogDescription>
+              {t('admin.confirmRecallDescription', { count: parsedBatchIds.length })}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-2 rounded-lg border bg-muted/30 p-3 max-h-32 overflow-auto">
+            {parsedBatchIds.map((id) => (
+              <p key={id} className="text-xs font-mono text-muted-foreground">{id}</p>
+            ))}
           </div>
-          <p className="text-xs text-muted-foreground mt-2"><span className="font-medium">{t('admin.reasonLabel')}:</span> {bulkReason}</p>
+          <p className="text-xs text-muted-foreground mt-2">
+            <span className="font-medium">{t('admin.reasonLabel')}:</span> {bulkReason}
+          </p>
           <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" size="sm" onClick={() => setShowRecallConfirm(false)}>{t('common.cancel')}</Button>
-            <Button variant="destructive" size="sm" disabled={recallLoading} onClick={handleBulkRecall}>{recallLoading ? t('common.loading') : t('admin.confirmRecall')}</Button>
+            <Button variant="outline" size="sm" onClick={() => setShowRecallConfirm(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button variant="destructive" size="sm" disabled={recallLoading} onClick={handleBulkRecall}>
+              {recallLoading ? t('common.loading') : t('admin.confirmRecall')}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }
