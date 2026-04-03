@@ -2,6 +2,8 @@ import * as store from '../store';
 import * as suiQueries from '../sui/queries';
 import { detectAnomalies } from '../anomaly/detector';
 import { logger } from '../logger';
+import { sql } from '../db';
+import crypto from 'crypto';
 
 type ReportStatus = 'PENDING' | 'CONFIRMED' | 'REJECTED';
 
@@ -34,6 +36,20 @@ const SEED_REPORTS: Report[] = [
 interface GqlContext {
   user?: { nodeId: string; orgRole: string };
 }
+
+const INVITE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
+function generateInviteCode(): string {
+  const bytes = crypto.randomBytes(6);
+  return Array.from(bytes).map(b => INVITE_CHARS[b % INVITE_CHARS.length]).join('');
+}
+
+const ALLOWED_INVITES: Record<string, string[]> = {
+  REGULATOR: ['MANUFACTURER', 'DISTRIBUTOR', 'CHEMIST'],
+  MANUFACTURER: ['DISTRIBUTOR'],
+  DISTRIBUTOR: ['CHEMIST'],
+  CHEMIST: [],
+};
 
 function formatDate(ts: number): string {
   const d = new Date(ts);
@@ -99,6 +115,30 @@ export const resolvers = {
     },
     reports: () => SEED_REPORTS,
     report: (_: unknown, args: { id: string }) => SEED_REPORTS.find((r) => r.id === args.id) ?? null,
+    myInvitations: async (_: unknown, _args: unknown, ctx: GqlContext) => {
+      if (!ctx.user) return [];
+      const rows = await sql`
+        SELECT id, invite_code, inviter_node_id, target_role, target_org_name,
+               EXTRACT(EPOCH FROM expires_at) * 1000 AS expires_at,
+               used_by,
+               EXTRACT(EPOCH FROM used_at) * 1000 AS used_at,
+               EXTRACT(EPOCH FROM created_at) * 1000 AS created_at
+        FROM invitations
+        WHERE inviter_node_id = ${ctx.user.nodeId}
+        ORDER BY created_at DESC
+      `;
+      return rows.map(r => ({
+        id: r.id,
+        inviteCode: r.invite_code,
+        inviterNodeId: r.inviter_node_id,
+        targetRole: r.target_role,
+        targetOrgName: r.target_org_name,
+        expiresAt: Number(r.expires_at),
+        usedBy: r.used_by,
+        usedAt: r.used_at ? Number(r.used_at) : null,
+        createdAt: Number(r.created_at),
+      }));
+    },
   },
   Mutation: {
     mintBatch: async (_: unknown, args: { batchId: string; drugName: string; composition: string; expiryDate: string; quantity: number; details?: string }, ctx: GqlContext) => {
@@ -160,6 +200,44 @@ export const resolvers = {
       // TODO: Persist to database or on-chain
       logger.info({ reportId: args.id, status: args.status }, 'Report resolved');
       return { success: true, message: `Report ${args.id} ${args.status.toLowerCase()}` };
+    },
+    createInvitation: async (_: unknown, args: { targetRole: string; targetOrgName?: string }, ctx: GqlContext) => {
+      if (!ctx.user) throw new Error('Authentication required');
+
+      const allowed = ALLOWED_INVITES[ctx.user.orgRole] ?? [];
+      if (!allowed.includes(args.targetRole)) {
+        throw new Error(`${ctx.user.orgRole} cannot invite ${args.targetRole}`);
+      }
+
+      const inviteCode = generateInviteCode();
+      const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000);
+
+      const rows = await sql`
+        INSERT INTO invitations (invite_code, inviter_node_id, target_role, target_org_name, expires_at)
+        VALUES (${inviteCode}, ${ctx.user.nodeId}, ${args.targetRole}, ${args.targetOrgName || null}, ${expiresAt.toISOString()})
+        RETURNING id,
+                  invite_code,
+                  inviter_node_id,
+                  target_role,
+                  target_org_name,
+                  EXTRACT(EPOCH FROM expires_at) * 1000 AS expires_at,
+                  used_by,
+                  EXTRACT(EPOCH FROM used_at) * 1000 AS used_at,
+                  EXTRACT(EPOCH FROM created_at) * 1000 AS created_at
+      `;
+
+      const r = rows[0];
+      return {
+        id: r.id,
+        inviteCode: r.invite_code,
+        inviterNodeId: r.inviter_node_id,
+        targetRole: r.target_role,
+        targetOrgName: r.target_org_name,
+        expiresAt: Number(r.expires_at),
+        usedBy: r.used_by,
+        usedAt: r.used_at ? Number(r.used_at) : null,
+        createdAt: Number(r.created_at),
+      };
     },
   },
 };

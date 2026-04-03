@@ -99,6 +99,7 @@ export const typeDefs = `#graphql
     analytics: AnalyticsData!
     reports: [Report!]!
     report(id: String!): Report
+    myInvitations: [Invitation!]!
   }
 
   type Mutation {
@@ -124,6 +125,7 @@ export const typeDefs = `#graphql
     bulkRecall(batchIds: [String!]!, reason: String!): MutationResult!
     submitReport(batchId: String!, reason: String!, reporterAddress: String): MutationResult!
     resolveReport(id: String!, status: ReportStatus!): MutationResult!
+    createInvitation(targetRole: String!, targetOrgName: String): Invitation!
   }
 
   type MutationResult {
@@ -146,5 +148,17 @@ export const typeDefs = `#graphql
     PENDING
     CONFIRMED
     REJECTED
+  }
+
+  type Invitation {
+    id: Int!
+    inviteCode: String!
+    inviterNodeId: String!
+    targetRole: String!
+    targetOrgName: String
+    expiresAt: Float!
+    usedBy: String
+    usedAt: Float
+    createdAt: Float!
   }
 `;
