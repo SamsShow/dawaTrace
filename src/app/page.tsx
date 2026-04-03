@@ -62,7 +62,6 @@ export default function Landing() {
 
       <section className="border-b border-border">
         <div className="max-w-5xl mx-auto px-6 py-20 md:py-28">
-          <p className="text-[11px] font-mono text-muted-foreground tracking-widest uppercase mb-5">CDAC Blockchain India Challenge 2026</p>
           <h1 className="text-4xl md:text-5xl font-semibold tracking-tight leading-[1.1] max-w-3xl mb-6">
             Every medicine batch.<br />
             <span className="text-muted-foreground font-normal">Tracked, verified, recalled in under 60 seconds.</span>
