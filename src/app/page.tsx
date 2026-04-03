@@ -52,6 +52,7 @@ export default function Landing() {
             <a href="#how-it-works" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">How it works</a>
             <a href="#features" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">Features</a>
             <a href="#stack" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">Stack</a>
+            <Link href="/about" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">About</Link>
             <Link href="/docs" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">Docs</Link>
             <ThemeToggle />
             <Link href="/login" className="text-xs border border-border px-3 py-1.5 hover:bg-accent transition-colors">Sign in</Link>
@@ -195,7 +196,15 @@ export default function Landing() {
               <p className="text-xs text-muted-foreground">Pharmaceutical supply chain on Sui</p>
               <p className="text-[11px] text-muted-foreground mt-1">Submitted to CDAC Blockchain India Challenge 2026</p>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-12 gap-y-4 text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-12 gap-y-4 text-xs">
+              <div>
+                <p className="font-medium mb-2">Platform</p>
+                <ul className="space-y-1 text-muted-foreground">
+                  <li><Link href="/about" className="hover:text-foreground transition-colors">About</Link></li>
+                  <li><Link href="/docs" className="hover:text-foreground transition-colors">Developer Docs</Link></li>
+                  <li><Link href="/login" className="hover:text-foreground transition-colors">Dashboard</Link></li>
+                </ul>
+              </div>
               <div>
                 <p className="font-medium mb-2">Blockchain</p>
                 <ul className="space-y-1 text-muted-foreground">
