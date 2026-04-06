@@ -5,9 +5,9 @@ module dawa_trace::dawa_points_tests {
     use dawa_trace::dawa_points;
     use dawa_trace::bridge_cap;
 
-    const BRIDGE_RELAY: address = @0xBR1DGE;
-    const REPORTER: address = @0xREP0RTER;
-    const PHARMACY: address = @0xPHARMACY;
+    const BRIDGE_RELAY: address = @0xB1;
+    const REPORTER: address = @0xC1;
+    const PHARMACY: address = @0xD1;
 
     #[test]
     fun test_award_points() {

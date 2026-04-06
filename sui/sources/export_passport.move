@@ -10,6 +10,12 @@ module dawa_trace::export_passport {
     use dawa_trace::bridge_cap::BridgeCapability;
 
     // =====================================================================
+    // Error codes
+    // =====================================================================
+
+    const EAlreadyInvalidated: u64 = 1;
+
+    // =====================================================================
     // Structs
     // =====================================================================
 
@@ -95,10 +101,13 @@ module dawa_trace::export_passport {
     }
 
     /// Invalidates an ExportPassport if the batch is recalled post-shipment.
+    /// Idempotent guard: aborts if already invalidated.
     public fun invalidate_passport(
         passport: &mut ExportPassport,
         _cap: &BridgeCapability,
     ) {
+        assert!(!passport.invalidated, EAlreadyInvalidated);
+
         passport.invalidated = true;
 
         event::emit(PassportInvalidated {
@@ -116,4 +125,6 @@ module dawa_trace::export_passport {
     public fun is_invalidated(passport: &ExportPassport): bool { passport.invalidated }
     public fun data_hash(passport: &ExportPassport): vector<u8> { passport.data_hash }
     public fun gmp_cert_ref(passport: &ExportPassport): String { passport.gmp_cert_ref }
+    public fun export_quantity(passport: &ExportPassport): u64 { passport.export_quantity }
+    public fun shipment_date(passport: &ExportPassport): String { passport.shipment_date }
 }

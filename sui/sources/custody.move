@@ -28,7 +28,9 @@ module dawa_trace::custody {
         data_hash: vector<u8>,
         /// Sequence number (transfer #1, #2, etc.)
         sequence: u64,
-        /// Unix epoch when this record was created
+        /// GPS coordinates at time of transfer (e.g., "19.0760,72.8777")
+        gps_location: String,
+        /// Unix timestamp (milliseconds) when this record was created
         timestamp: u64,
     }
 
@@ -56,6 +58,7 @@ module dawa_trace::custody {
         quantity: u64,
         data_hash: vector<u8>,
         sequence: u64,
+        gps_location: String,
         _cap: &BridgeCapability,
         ctx: &mut TxContext,
     ) {
@@ -78,7 +81,8 @@ module dawa_trace::custody {
             quantity,
             data_hash,
             sequence,
-            timestamp: tx_context::epoch(ctx),
+            gps_location,
+            timestamp: tx_context::epoch_timestamp_ms(ctx),
         };
 
         // Freeze so anyone can read it without owning it
@@ -94,5 +98,6 @@ module dawa_trace::custody {
     public fun to_node(record: &CustodyRecord): String { record.to_node }
     public fun quantity(record: &CustodyRecord): u64 { record.quantity }
     public fun sequence(record: &CustodyRecord): u64 { record.sequence }
+    public fun gps_location(record: &CustodyRecord): String { record.gps_location }
     public fun timestamp(record: &CustodyRecord): u64 { record.timestamp }
 }

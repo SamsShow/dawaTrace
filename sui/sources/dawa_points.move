@@ -140,7 +140,7 @@ module dawa_trace::dawa_points {
             owner: ledger.owner,
             amount,
             pharmacy_id,
-            timestamp: tx_context::epoch(ctx),
+            timestamp: tx_context::epoch_timestamp_ms(ctx),
         };
         transfer::freeze_object(record);
     }
