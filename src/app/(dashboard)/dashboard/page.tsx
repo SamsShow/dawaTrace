@@ -18,6 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import ErrorAlert from '@/components/ErrorAlert';
 import type { Batch, BatchStatus, RecallRecord } from '@/lib/types';
 
 const DASHBOARD_QUERY = gql`
@@ -33,7 +34,7 @@ const STATUS_VARIANT: Record<BatchStatus, 'outline' | 'destructive' | 'secondary
 };
 
 export default function Dashboard() {
-  const { data, loading } = useQuery<{ batches: Batch[]; recalls: RecallRecord[] }>(DASHBOARD_QUERY, { pollInterval: 30_000 });
+  const { data, loading, error, refetch } = useQuery<{ batches: Batch[]; recalls: RecallRecord[] }>(DASHBOARD_QUERY, { pollInterval: 30_000 });
 
   const batches = data?.batches ?? [];
   const recalls = data?.recalls ?? [];
@@ -111,6 +112,14 @@ export default function Dashboard() {
           Real-time supply chain status across all registered nodes
         </p>
       </div>
+
+      {error && (
+        <ErrorAlert
+          title="Failed to load dashboard data"
+          message={error.message}
+          retry={() => refetch()}
+        />
+      )}
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">

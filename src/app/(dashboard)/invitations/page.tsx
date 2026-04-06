@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
 import { useMyInvitations, useCreateInvitation } from '@/hooks/useInvitations';
+import ErrorAlert from '@/components/ErrorAlert';
 
 const ALLOWED_INVITES: Record<string, string[]> = {
   REGULATOR: ['MANUFACTURER', 'DISTRIBUTOR', 'CHEMIST'],
@@ -42,7 +43,7 @@ function CopyButton({ text }: { text: string }) {
 
 export default function Invitations() {
   const { user } = useAuth();
-  const { data, loading } = useMyInvitations();
+  const { data, loading, error: queryError, refetch } = useMyInvitations();
   const [createInvitation, { loading: creating }] = useCreateInvitation();
   const [targetRole, setTargetRole] = useState('');
   const [targetOrgName, setTargetOrgName] = useState('');
@@ -70,6 +71,14 @@ export default function Invitations() {
         <Mail className="h-5 w-5 text-muted-foreground" />
         <h1 className="text-lg font-semibold">Invitations</h1>
       </div>
+
+      {queryError && (
+        <ErrorAlert
+          title="Failed to load invitations"
+          message={queryError.message}
+          retry={() => refetch()}
+        />
+      )}
 
       {allowedRoles.length > 0 && (
         <Card>

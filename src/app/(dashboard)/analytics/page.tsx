@@ -11,6 +11,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import ErrorAlert from '@/components/ErrorAlert';
 
 const ANALYTICS_QUERY = gql`
   query AnalyticsData {
@@ -78,7 +79,7 @@ function ChartSkeleton() {
 }
 
 export default function Analytics() {
-  const { data, loading } = useQuery<{ analytics: AnalyticsData }>(ANALYTICS_QUERY, { pollInterval: 30_000 });
+  const { data, loading, error, refetch } = useQuery<{ analytics: AnalyticsData }>(ANALYTICS_QUERY, { pollInterval: 30_000 });
   const analytics = data?.analytics;
   const total = analytics?.totalBatches ?? 0;
   function pct(n: number): string {
@@ -146,6 +147,14 @@ export default function Analytics() {
           Supply chain performance and batch lifecycle overview
         </p>
       </div>
+
+      {error && (
+        <ErrorAlert
+          title="Failed to load analytics data"
+          message={error.message}
+          retry={() => refetch()}
+        />
+      )}
 
       {/* Stat cards row */}
       <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
