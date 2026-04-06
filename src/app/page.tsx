@@ -76,6 +76,9 @@ export default function Landing() {
             <Link href="/login" className="inline-flex items-center gap-2 bg-foreground text-background text-xs px-5 py-2.5 hover:opacity-90 transition-opacity font-medium">
               Open dashboard <ArrowRight className="h-3.5 w-3.5" />
             </Link>
+            <Link href="/verify" className="inline-flex items-center gap-2 border border-border text-xs px-5 py-2.5 hover:bg-accent transition-colors">
+              <Shield className="h-3.5 w-3.5" /> Verify a medicine
+            </Link>
             <a href="#how-it-works" className="inline-flex items-center gap-2 border border-border text-xs px-5 py-2.5 hover:bg-accent transition-colors">How it works</a>
           </div>
         </div>
