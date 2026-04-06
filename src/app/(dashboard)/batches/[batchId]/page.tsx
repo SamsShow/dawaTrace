@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { FileUpload } from '@/components/ui/file-upload';
+import BatchQRCode from '@/components/BatchQRCode';
 import type { BatchStatus } from '@/lib/types';
 
 const TRANSFER_BATCH = gql`
@@ -130,6 +131,16 @@ export default function BatchDetail() {
             <Field label="Current custodian" value={batch.currentCustodian} mono />
             <Field label="Sui Object ID" value={batch.suiObjectId} mono />
             <Field label="Data hash" value={batch.dataHash} mono />
+          </div>
+        </section>
+
+        <section>
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Package QR Code</h2>
+          <div className="border border-border p-6 flex flex-col items-center">
+            <BatchQRCode suiObjectId={batch.suiObjectId} batchId={batch.batchId} />
+            <p className="text-[11px] text-muted-foreground mt-3 text-center max-w-xs">
+              Print this QR code on the medicine packaging. Anyone can scan it to verify the batch on Sui blockchain.
+            </p>
           </div>
         </section>
 

@@ -1,19 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Search, Shield } from 'lucide-react';
+import { Search, Shield, Camera, Keyboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import ThemeToggle from '@/components/ThemeToggle';
 
+const QRScanner = lazy(() => import('@/components/QRScanner'));
+
 export default function VerifyLanding() {
   const router = useRouter();
   const [objectId, setObjectId] = useState('');
   const [error, setError] = useState('');
+  const [mode, setMode] = useState<'manual' | 'scan'>('manual');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +25,15 @@ export default function VerifyLanding() {
     if (!id) { setError('Enter a Sui Object ID.'); return; }
     if (!id.startsWith('0x') || id.length < 10) { setError('Invalid Sui Object ID. Must start with 0x.'); return; }
     router.push(`/verify/${id}`);
+  };
+
+  const handleScan = (scannedId: string) => {
+    router.push(`/verify/${scannedId}`);
+  };
+
+  const handleScanError = (err: string) => {
+    setError(err);
+    setMode('manual');
   };
 
   return (
@@ -38,40 +50,79 @@ export default function VerifyLanding() {
           </div>
           <h1 className="text-xl font-semibold tracking-tight">Verify Medicine</h1>
           <p className="text-sm text-muted-foreground text-center max-w-xs">
-            Check if a medicine batch is authentic by entering its Sui Object ID or scanning the QR code on the package.
+            Scan the QR code on the medicine package or enter the Sui Object ID manually.
           </p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Batch Verification</CardTitle>
-            <CardDescription>No login required — verification is public and reads directly from Sui blockchain.</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-base">Batch Verification</CardTitle>
+                <CardDescription>No login required — reads directly from Sui blockchain.</CardDescription>
+              </div>
+            </div>
+            {/* Mode toggle */}
+            <div className="flex gap-1 rounded-lg border border-border p-1 mt-3">
+              <button
+                onClick={() => { setMode('scan'); setError(''); }}
+                className={`flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${mode === 'scan' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                <Camera className="h-3.5 w-3.5" /> Scan QR
+              </button>
+              <button
+                onClick={() => { setMode('manual'); setError(''); }}
+                className={`flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${mode === 'manual' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                <Keyboard className="h-3.5 w-3.5" /> Enter ID
+              </button>
+            </div>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="objectId">Sui Object ID</Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="objectId"
-                    value={objectId}
-                    onChange={(e) => setObjectId(e.target.value)}
-                    placeholder="0xabc123..."
-                    className="pl-9 font-mono text-sm"
-                    autoFocus
-                  />
-                </div>
+            {mode === 'scan' ? (
+              <div className="space-y-4">
+                <Suspense fallback={
+                  <div className="h-[280px] rounded-lg border border-border bg-muted/30 flex items-center justify-center">
+                    <p className="text-xs text-muted-foreground">Loading camera...</p>
+                  </div>
+                }>
+                  <QRScanner onScan={handleScan} onError={handleScanError} />
+                </Suspense>
+                <p className="text-xs text-muted-foreground text-center">
+                  Point your camera at the QR code on the medicine package
+                </p>
+                {error && (
+                  <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2">
+                    <p className="text-xs text-destructive">{error}</p>
+                  </div>
+                )}
               </div>
-              {error && (
-                <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2">
-                  <p className="text-xs text-destructive">{error}</p>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="objectId">Sui Object ID</Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="objectId"
+                      value={objectId}
+                      onChange={(e) => setObjectId(e.target.value)}
+                      placeholder="0xabc123..."
+                      className="pl-9 font-mono text-sm"
+                      autoFocus
+                    />
+                  </div>
                 </div>
-              )}
-              <Button type="submit" className="w-full gap-2">
-                <Search className="h-4 w-4" /> Verify Batch
-              </Button>
-            </form>
+                {error && (
+                  <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2">
+                    <p className="text-xs text-destructive">{error}</p>
+                  </div>
+                )}
+                <Button type="submit" className="w-full gap-2">
+                  <Search className="h-4 w-4" /> Verify Batch
+                </Button>
+              </form>
+            )}
           </CardContent>
         </Card>
 
