@@ -28,8 +28,8 @@ const DASHBOARD_QUERY = gql`
   }
 `;
 
-const STATUS_VARIANT: Record<BatchStatus, 'outline' | 'destructive' | 'warning' | 'success' | 'secondary'> = {
-  ACTIVE: 'success', IN_TRANSIT: 'outline', DISPENSED: 'secondary', RECALLED: 'destructive', SUSPENDED_REVIEW: 'warning',
+const STATUS_VARIANT: Record<BatchStatus, 'outline' | 'destructive' | 'secondary' | 'default'> = {
+  ACTIVE: 'default', IN_TRANSIT: 'outline', DISPENSED: 'secondary', RECALLED: 'destructive', SUSPENDED_REVIEW: 'outline',
 };
 
 export default function Dashboard() {

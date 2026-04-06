@@ -4,12 +4,12 @@ import Link from 'next/link';
 import { Badge } from './ui/badge';
 import type { Batch, BatchStatus } from '@/lib/types';
 
-const STATUS_VARIANT: Record<BatchStatus, 'outline' | 'destructive' | 'warning' | 'success' | 'secondary'> = {
-  ACTIVE: 'success',
+const STATUS_VARIANT: Record<BatchStatus, 'outline' | 'destructive' | 'secondary' | 'default'> = {
+  ACTIVE: 'default',
   IN_TRANSIT: 'outline',
   DISPENSED: 'secondary',
   RECALLED: 'destructive',
-  SUSPENDED_REVIEW: 'warning',
+  SUSPENDED_REVIEW: 'outline',
 };
 
 export default function BatchCard({ batch }: { batch: Batch }) {

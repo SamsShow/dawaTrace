@@ -12,9 +12,9 @@ interface Report {
   resolvedAt: number | null; pointsAwarded: number | null;
 }
 
-const STATUS_VARIANT: Record<Report['status'], 'default' | 'success' | 'destructive' | 'warning'> = {
-  PENDING: 'warning',
-  CONFIRMED: 'success',
+const STATUS_VARIANT: Record<Report['status'], 'default' | 'secondary' | 'destructive' | 'outline'> = {
+  PENDING: 'outline',
+  CONFIRMED: 'default',
   REJECTED: 'destructive',
 };
 

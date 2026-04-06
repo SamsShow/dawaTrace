@@ -82,7 +82,7 @@ export default function Recalls() {
                     <TableCell className="text-xs font-mono text-muted-foreground">{r.issuedBy}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">{r.issuedAt}</TableCell>
                     <TableCell>
-                      <Badge variant={r.suiAnchored ? 'success' : 'default'}>
+                      <Badge variant={r.suiAnchored ? 'secondary' : 'outline'}>
                         {r.suiAnchored ? 'Anchored' : 'Pending'}
                       </Badge>
                     </TableCell>

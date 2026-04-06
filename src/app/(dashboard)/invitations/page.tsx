@@ -20,10 +20,10 @@ const ALLOWED_INVITES: Record<string, string[]> = {
   CHEMIST: [],
 };
 
-function getInviteStatus(inv: { usedBy: string | null; expiresAt: number }): { label: string; variant: 'default' | 'success' | 'destructive' } {
+function getInviteStatus(inv: { usedBy: string | null; expiresAt: number }): { label: string; variant: 'default' | 'secondary' | 'destructive' } {
   if (inv.usedBy) return { label: 'Used', variant: 'default' };
   if (inv.expiresAt < Date.now()) return { label: 'Expired', variant: 'destructive' };
-  return { label: 'Pending', variant: 'success' };
+  return { label: 'Pending', variant: 'secondary' };
 }
 
 function CopyButton({ text }: { text: string }) {

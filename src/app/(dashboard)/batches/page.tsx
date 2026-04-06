@@ -31,12 +31,12 @@ import type { Batch, BatchStatus } from '@/lib/types';
 const LIST_BATCHES = gql`query ListBatches { batches { batchId drugName manufacturerId quantity expiryDate currentCustodian status createdAt } }`;
 const MINT_BATCH = gql`mutation MintBatch($batchId: String!, $drugName: String!, $composition: String!, $expiryDate: String!, $quantity: Int!, $details: String) { mintBatch(batchId: $batchId, drugName: $drugName, composition: $composition, expiryDate: $expiryDate, quantity: $quantity, details: $details) { success message } }`;
 
-const STATUS_VARIANT: Record<BatchStatus, 'outline' | 'destructive' | 'warning' | 'success' | 'secondary'> = {
-  ACTIVE: 'success',
+const STATUS_VARIANT: Record<BatchStatus, 'outline' | 'destructive' | 'secondary' | 'default'> = {
+  ACTIVE: 'default',
   IN_TRANSIT: 'outline',
   DISPENSED: 'secondary',
   RECALLED: 'destructive',
-  SUSPENDED_REVIEW: 'warning',
+  SUSPENDED_REVIEW: 'outline',
 };
 
 const STATUS_LABEL: Record<BatchStatus, string> = {

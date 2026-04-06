@@ -164,12 +164,12 @@ export default function Admin() {
                       <span className="font-mono text-xs">{v.chemistId}</span>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={v.violationCount >= 3 ? 'destructive' : 'warning'}>
+                      <Badge variant={v.violationCount >= 3 ? 'destructive' : 'secondary'}>
                         {v.violationCount}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={v.suspended ? 'destructive' : 'success'}>
+                      <Badge variant={v.suspended ? 'destructive' : 'outline'}>
                         {v.suspended ? t('admin.suspended') : t('admin.active')}
                       </Badge>
                     </TableCell>
