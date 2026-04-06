@@ -7,8 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-const ROLES = ['MANUFACTURER', 'DISTRIBUTOR', 'CHEMIST'] as const;
-
 const INDIAN_STATES = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
   'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
@@ -27,7 +25,6 @@ export default function AuthPage() {
     searchParams.get('mode') === 'register' ? 'register' : 'login'
   );
 
-  // Sync mode with URL
   useEffect(() => {
     const m = searchParams.get('mode');
     if (m === 'register') setMode('register');
@@ -37,6 +34,7 @@ export default function AuthPage() {
   const switchMode = (m: 'login' | 'register') => {
     setMode(m);
     setError('');
+    setRegisterStep(1);
     router.replace(m === 'register' ? '/login?mode=register' : '/login', { scroll: false });
   };
 
@@ -45,7 +43,8 @@ export default function AuthPage() {
   const [loginPassword, setLoginPassword] = useState('');
 
   // Register state
-  const [orgRole, setOrgRole] = useState('');
+  const [registerStep, setRegisterStep] = useState<1 | 2>(1);
+  const [inviteCode, setInviteCode] = useState('');
   const [orgName, setOrgName] = useState('');
   const [drugLicense, setDrugLicense] = useState('');
   const [regState, setRegState] = useState('');
@@ -57,8 +56,6 @@ export default function AuthPage() {
   // Shared
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const needsLicense = orgRole === 'MANUFACTURER' || orgRole === 'CHEMIST';
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,14 +75,21 @@ export default function AuthPage() {
     }
   };
 
+  const handleInviteCodeSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    const code = inviteCode.trim();
+    if (!code) { setError('Enter an invite code.'); return; }
+    if (code.length < 6) { setError('Invite code must be 6 characters.'); return; }
+    setRegisterStep(2);
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!orgRole) { setError('Select a role.'); return; }
     if (!orgName.trim()) { setError('Organization name is required.'); return; }
     if (regPassword !== confirmPassword) { setError('Passwords do not match.'); return; }
     if (regPassword.length < 8) { setError('Password must be at least 8 characters.'); return; }
-    if (needsLicense && !drugLicense.trim()) { setError('Drug license number is required for this role.'); return; }
 
     setLoading(true);
     try {
@@ -93,8 +97,8 @@ export default function AuthPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          inviteCode: inviteCode.trim(),
           orgName: orgName.trim(),
-          orgRole,
           drugLicenseNumber: drugLicense.trim() || undefined,
           state: regState || undefined,
           password: regPassword,
@@ -202,10 +206,7 @@ export default function AuthPage() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="loginPassword" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Password</Label>
-                    <button type="button" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Forgot password?</button>
-                  </div>
+                  <Label htmlFor="loginPassword" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Password</Label>
                   <div className="relative">
                     <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60" width="16" height="16" viewBox="0 0 24 24" fill="none">
                       <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="1.5"/>
@@ -222,26 +223,64 @@ export default function AuthPage() {
                 </Button>
               </form>
             </>
-          ) : (
+          ) : registerStep === 1 ? (
             <>
               <div className="mb-6">
                 <h1 className="text-2xl font-semibold tracking-tight">Create account</h1>
-                <p className="text-sm text-muted-foreground mt-1.5">Register your organization on the network</p>
+                <p className="text-sm text-muted-foreground mt-1.5">Enter the invite code from your upstream partner</p>
+              </div>
+
+              <form onSubmit={handleInviteCodeSubmit} className="space-y-5">
+                <div className="space-y-1.5">
+                  <Label htmlFor="inviteCode" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Invite Code</Label>
+                  <Input
+                    id="inviteCode"
+                    value={inviteCode}
+                    onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                    placeholder="ABC123"
+                    maxLength={6}
+                    className="h-14 font-mono tracking-[0.3em] text-center text-xl"
+                    autoFocus
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Your invite code determines your role. Ask your regulator, manufacturer, or distributor for a code.
+                  </p>
+                </div>
+
+                <ErrorMessage error={error} />
+
+                <Button type="submit" className="w-full h-11 text-sm font-medium">
+                  Continue
+                </Button>
+              </form>
+            </>
+          ) : (
+            <>
+              <div className="mb-6">
+                <h1 className="text-2xl font-semibold tracking-tight">Complete registration</h1>
+                <p className="text-sm text-muted-foreground mt-1.5">Fill in your organization details</p>
+              </div>
+
+              {/* Invite code badge */}
+              <div className="flex items-center justify-between rounded-lg border bg-muted/50 px-3 py-2 mb-5">
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Invite code</p>
+                  <p className="text-sm font-mono font-semibold tracking-wider">{inviteCode}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setRegisterStep(1); setError(''); }}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Change
+                </button>
               </div>
 
               <form onSubmit={handleRegister} className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label htmlFor="orgRole" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Role</Label>
-                    <select
-                      id="orgRole"
-                      value={orgRole}
-                      onChange={(e) => setOrgRole(e.target.value)}
-                      className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    >
-                      <option value="">Select role</option>
-                      {ROLES.map(r => <option key={r} value={r}>{r.charAt(0) + r.slice(1).toLowerCase()}</option>)}
-                    </select>
+                    <Label htmlFor="orgName" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Organization</Label>
+                    <Input id="orgName" value={orgName} onChange={(e) => setOrgName(e.target.value)} placeholder="Sun Pharma" className="h-11 text-sm" />
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="regState" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">State</Label>
@@ -258,27 +297,9 @@ export default function AuthPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="orgName" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Organization Name</Label>
-                  <div className="relative">
-                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <path d="M3 21h18M9 8h1M9 12h1M9 16h1M14 8h1M14 12h1M14 16h1M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <Input id="orgName" value={orgName} onChange={(e) => setOrgName(e.target.value)} placeholder="Sun Pharma" className="h-11 pl-10 text-sm" />
-                  </div>
+                  <Label htmlFor="drugLicense" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Drug License Number <span className="normal-case font-normal">(if applicable)</span></Label>
+                  <Input id="drugLicense" value={drugLicense} onChange={(e) => setDrugLicense(e.target.value)} placeholder="DL-MH-2024-001234" className="h-11 font-mono text-sm" />
                 </div>
-
-                {needsLicense && (
-                  <div className="space-y-1.5">
-                    <Label htmlFor="drugLicense" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Drug License Number</Label>
-                    <div className="relative">
-                      <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      <Input id="drugLicense" value={drugLicense} onChange={(e) => setDrugLicense(e.target.value)} placeholder="DL-MH-2024-001234" className="h-11 pl-10 font-mono text-sm" />
-                    </div>
-                  </div>
-                )}
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">

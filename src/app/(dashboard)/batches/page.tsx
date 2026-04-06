@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery, useMutation, gql } from '@apollo/client';
 import { format } from 'date-fns';
-import { PackagePlus, Download, ExternalLink } from 'lucide-react';
+import { PackagePlus, Download, ExternalLink, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -112,7 +112,18 @@ export default function Batches() {
     }
   };
 
+  const [search, setSearch] = useState('');
   const batches = data?.batches ?? [];
+  const filtered = search.trim()
+    ? batches.filter((b) => {
+        const q = search.toLowerCase();
+        return b.batchId.toLowerCase().includes(q)
+          || b.drugName.toLowerCase().includes(q)
+          || b.manufacturerId.toLowerCase().includes(q)
+          || b.currentCustodian.toLowerCase().includes(q)
+          || b.status.toLowerCase().includes(q);
+      })
+    : batches;
 
   return (
     <>
@@ -147,15 +158,27 @@ export default function Batches() {
               <CardTitle className="text-sm font-semibold">
                 Batch Registry
               </CardTitle>
-              {!loading && (
-                <span className="text-xs text-muted-foreground">
-                  {batches.length} {batches.length === 1 ? 'batch' : 'batches'}
-                </span>
-              )}
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search batches..."
+                    className="h-8 w-56 rounded-md border border-input bg-transparent pl-8 pr-3 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  />
+                </div>
+                {!loading && (
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    {filtered.length} of {batches.length}
+                  </span>
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            {!loading && batches.length === 0 ? (
+            {!loading && filtered.length === 0 && !search ? (
               <div className="flex flex-col items-center justify-center py-16 text-center px-6">
                 <div className="rounded-full bg-muted p-3 mb-4">
                   <PackagePlus className="h-5 w-5 text-muted-foreground" />
@@ -183,7 +206,7 @@ export default function Batches() {
                   {loading ? (
                     <TableSkeleton />
                   ) : (
-                    batches.map((b) => (
+                    filtered.map((b) => (
                       <TableRow
                         key={b.batchId}
                         className="cursor-pointer group"
