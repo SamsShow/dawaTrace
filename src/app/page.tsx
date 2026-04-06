@@ -52,6 +52,7 @@ export default function Landing() {
             <a href="#how-it-works" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">How it works</a>
             <a href="#features" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">Features</a>
             <a href="#stack" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">Stack</a>
+            <Link href="/verify" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">Verify</Link>
             <Link href="/about" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">About</Link>
             <Link href="/docs" className="text-xs text-muted-foreground hover:text-foreground transition-colors hidden sm:block">Docs</Link>
             <ThemeToggle />
