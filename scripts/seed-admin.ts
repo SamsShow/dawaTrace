@@ -39,6 +39,13 @@ async function seed() {
     )
   `;
 
+  // CREATE TABLE IF NOT EXISTS does not upgrade existing tables — add any missing columns.
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS drug_license_number TEXT`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS state TEXT`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS invited_by TEXT`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'ACTIVE'`;
+  await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`;
+
   await sql`
     CREATE TABLE IF NOT EXISTS invitations (
       id              SERIAL PRIMARY KEY,
