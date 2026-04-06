@@ -1,19 +1,6 @@
-'use client';
-
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { getToken, getUser } from '@/lib/auth';
 import Sidebar from '@/components/Sidebar';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!getToken() || !getUser()) {
-      router.replace('/login');
-    }
-  }, [router]);
-
   return (
     <div className="flex min-h-screen">
       <Sidebar />

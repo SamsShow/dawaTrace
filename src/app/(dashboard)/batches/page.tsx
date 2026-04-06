@@ -26,7 +26,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useAuth } from '@/hooks/useAuth';
-import { getToken } from '@/lib/auth';
 import type { Batch, BatchStatus } from '@/lib/types';
 
 const LIST_BATCHES = gql`query ListBatches { batches { batchId drugName manufacturerId quantity expiryDate currentCustodian status createdAt } }`;
@@ -51,8 +50,7 @@ const STATUS_LABEL: Record<BatchStatus, string> = {
 const EMPTY_FORM = { batchId: '', drugName: '', composition: '', expiryDate: '', quantity: '', licenseNo: '' };
 
 async function downloadExport(path: string) {
-  const token = getToken();
-  const res = await fetch(path, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  const res = await fetch(path);
   if (!res.ok) throw new Error('Export failed');
   const blob = await res.blob();
   const disposition = res.headers.get('Content-Disposition') || '';

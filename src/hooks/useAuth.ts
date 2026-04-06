@@ -1,22 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { getToken, getUser, clearAuth, type AuthUser } from '@/lib/auth';
+import { useSession, signOut } from 'next-auth/react';
 
 export function useAuth() {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const token = typeof window !== 'undefined' ? getToken() : null;
-  const isAuthenticated = user !== null && token !== null;
+  const { data: session, status } = useSession();
+  const user = session?.user ? { nodeId: session.user.nodeId, orgRole: session.user.orgRole } : null;
+  const isAuthenticated = status === 'authenticated';
 
   const logout = () => {
-    clearAuth();
-    setUser(null);
-    window.location.href = '/login';
+    signOut({ callbackUrl: '/login' });
   };
 
-  useEffect(() => {
-    setUser(getUser());
-  }, []);
-
-  return { user, isAuthenticated, logout, token };
+  return { user, isAuthenticated, logout, status };
 }

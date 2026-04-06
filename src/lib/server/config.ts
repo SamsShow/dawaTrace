@@ -4,9 +4,7 @@ const schema = z.object({
   SUI_RPC_URL: z.string().url().default('https://fullnode.devnet.sui.io:443'),
   SUI_PACKAGE_ID: z.string().default('0x0'),
 
-  API_JWT_SECRET: z.string().default('dev-secret-change-in-production-min32chars'),
-
-  DATABASE_URL: z.string().url(),
+  DATABASE_URL: z.string().min(1),
 
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 });

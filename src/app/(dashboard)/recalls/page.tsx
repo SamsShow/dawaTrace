@@ -6,11 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAuth } from '@/hooks/useAuth';
-import { getToken } from '@/lib/auth';
 
 async function downloadExport(path: string) {
-  const token = getToken();
-  const res = await fetch(path, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  const res = await fetch(path);
   if (!res.ok) throw new Error('Export failed');
   const blob = await res.blob();
   const disposition = res.headers.get('Content-Disposition') || '';

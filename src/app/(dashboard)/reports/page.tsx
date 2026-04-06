@@ -6,8 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useAuth } from '@/hooks/useAuth';
-
 interface Report {
   id: string; batchId: string; reporterAddress: string; reason: string;
   status: 'PENDING' | 'CONFIRMED' | 'REJECTED'; createdAt: number;
@@ -21,7 +19,6 @@ const STATUS_VARIANT: Record<Report['status'], 'default' | 'success' | 'destruct
 };
 
 export default function Reports() {
-  const { token } = useAuth();
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [resolving, setResolving] = useState<string | null>(null);
@@ -30,13 +27,13 @@ export default function Reports() {
     try {
       const res = await fetch('/api/graphql', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: `query { reports { id batchId reporterAddress reason status createdAt resolvedAt pointsAwarded } }` }),
       });
       const json = await res.json();
       setReports(json.data?.reports ?? []);
     } catch { /* empty state */ } finally { setLoading(false); }
-  }, [token]);
+  }, []);
 
   useEffect(() => { fetchReports(); }, [fetchReports]);
 
@@ -45,7 +42,7 @@ export default function Reports() {
     try {
       await fetch('/api/graphql', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query: `mutation ResolveReport($id: String!, $status: ReportStatus!) { resolveReport(id: $id, status: $status) { success message } }`,
           variables: { id, status },
